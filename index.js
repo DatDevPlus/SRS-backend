@@ -12,7 +12,7 @@ dotenv.config();
 
 const connect = () => {
     try {
-        mongoose.connect(process.env.uri);
+        mongoose.connect(process.env.URI);
     } catch (error) {
         throw error;
     }
@@ -26,7 +26,7 @@ express.urlencoded({ extended: true })
 
 //routes
 app.use("/api/auth", authRoute)
-app.use("/api/user", usersRoute)
+app.use("/api/users", usersRoute)
 
 app.listen(8000, () => {
     connect();
