@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
-
+// const mongoose = require("mongoose");
+import Role from "./Role.js";
+import Group from "./Group.js";
 const UserSchema = new mongoose.Schema(
   {
     username: {
@@ -21,20 +23,21 @@ const UserSchema = new mongoose.Schema(
     },
     role_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Role",
+      ref: "role",
     },
     group_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      ref: "group",
     },
   },
   { timestamps: true }
 );
 UserSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "Role",
-    path: "Group",
-  });
+  this.populate([
+    { path: "role_id", model: Role },
+    { path: "group_id", model: Group },
+  ]);
   next();
 });
-export default mongoose.model("User", UserSchema);
+
+export default mongoose.model("user", UserSchema);

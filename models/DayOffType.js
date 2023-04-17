@@ -14,4 +14,4 @@ const Day_of_typeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Day_of_Type", Day_of_typeSchema);
+export default mongoose.model("day_of_type", Day_of_typeSchema);

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import Role from "./Role.js";
 const PermissionSchema = new mongoose.Schema(
   {
     permission_detail: {
@@ -9,15 +9,13 @@ const PermissionSchema = new mongoose.Schema(
     },
     role_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Role",
+      ref: "role",
     },
   },
   { timestamps: true }
 );
 PermissionSchema.pre(/^find/, function (next) {
-    this.populate({
-      path: "Role",
-    });
-    next();
-  });
-export default mongoose.model("Permission", PermissionSchema);
+  this.populate([{ path: "role_id", model: Role }]);
+  next();
+});
+export default mongoose.model("permission", PermissionSchema);

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
-import User from "../models/User.js";
+import  User from "../models/User.js";
 export const checkUser = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
@@ -82,7 +82,11 @@ export const login = async (req, res) => {
     // return token
     console.log(user);
     const accessToken = jwt.sign(
-      { userId: user._id, username: user.username },
+      {
+        userId: user._id,
+        username: user.username,
+        // role: user.role_id.role_name,
+      },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1d" }
     );
@@ -92,7 +96,7 @@ export const login = async (req, res) => {
       accessToken,
     });
   } catch (err) {
-    console.log(error);
+    console.log(err);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

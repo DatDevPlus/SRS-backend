@@ -4,9 +4,14 @@ import {
   Create_Request,
   Update_Request,
   Delete_Request,
+  Get_Request_Detail,
 } from "../controllers/RequestDetailController.js";
+import { create } from "../controllers/PermissionController.js";
 const router = express.Router();
 
+router.post("/Create_date", create);
+
+router.get("/getRequestDetail/:id", Get_Request_Detail);
 //get
 router.get("/getAllRequest", Get_All_Request);
 //create

@@ -14,4 +14,4 @@ const Day_of_timeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Day_of_Time", Day_of_timeSchema);
+export default mongoose.model("day_of_time", Day_of_timeSchema);

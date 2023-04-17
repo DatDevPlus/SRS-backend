@@ -1,10 +1,21 @@
 import Request_detail from "../models/RequestDetail.js";
-
+export const Get_Request_Detail = async (req, res) => {
+  try {
+    const request = await Request_detail.findById({
+      _id: req.params.id,
+    });
+    if (!request) {
+      res.status(404).json({ success: false, message: "Request is not exist" });
+    }
+    if (request) res.json({ success: true, request });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 export const Get_All_Request = async (req, res) => {
   try {
     const request = await Request_detail.find().sort([["createdAt", -1]]);
-    // category.sort({ createdAt });
-    // console.log(category);
     res.json({ success: true, request });
   } catch (error) {
     console.log(error);
@@ -19,21 +30,22 @@ export const Create_Request = async (req, res) => {
       start_date,
       end_date,
       action,
-      // user_id,
-      // date_off_time,
-      // date_off_type,
+      user_id,
+      day_off_type_id,
+      day_off_time_id,
       status,
       approvers_number,
     } = req.body;
+    console.log(req.body);
     if (
       !reason ||
       !quantity ||
       !start_date ||
       !end_date ||
       !action ||
-      // !user_id ||
-      // !date_off_time ||
-      // !date_off_type ||
+      !user_id ||
+      !day_off_type_id ||
+      !day_off_time_id ||
       !status ||
       !approvers_number
     )
@@ -46,9 +58,9 @@ export const Create_Request = async (req, res) => {
       start_date,
       end_date,
       action,
-      // user_id,
-      // date_off_time,
-      // date_off_type,
+      user_id,
+      day_off_type_id,
+      day_off_time_id,
       status,
       approvers_number,
     });
@@ -70,9 +82,9 @@ export const Update_Request = async (req, res) => {
     start_date,
     end_date,
     action,
-    // user_id,
-    // date_off_time,
-    // date_off_type,
+    user_id,
+    date_off_time,
+    date_off_type,
     status,
     approvers_number,
   } = req.body;
@@ -82,9 +94,9 @@ export const Update_Request = async (req, res) => {
     !start_date ||
     !end_date ||
     !action ||
-    // !user_id ||
-    // !date_off_time ||
-    // !date_off_type ||
+    !user_id ||
+    !date_off_time ||
+    !date_off_type ||
     !status ||
     !approvers_number
   )
@@ -98,9 +110,9 @@ export const Update_Request = async (req, res) => {
       start_date,
       end_date,
       action,
-      // user_id,
-      // date_off_time,
-      // date_off_type,
+      user_id,
+      date_off_time,
+      date_off_type,
       status,
       approvers_number,
     };
