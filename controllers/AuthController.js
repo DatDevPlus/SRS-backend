@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import Permission from "../models/Permission.js";
 import Role from "../models/Role.js";
 export const checkUser = async (req, res) => {
+  console.log(req.userId);
   try {
     const user = await User.findById(req.userId).select("-password");
     if (!user)

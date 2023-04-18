@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 mongoose.set("strictQuery", false);
 import { Schema } from "mongoose";
-import DateOfTime from "./DayOffTime.js";
-import DateOfType from "./DayOffType.js";
 import User from "./User.js";
 const RequestSchema = Schema(
   {
