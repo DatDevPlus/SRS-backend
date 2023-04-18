@@ -12,10 +12,11 @@ export const get_Group = async (req, res) => {
 
 export const create_Group = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, user_id } = req.body;
     const newGroup = new Group({
       name,
       description,
+      user_id,
     });
     await newGroup.save();
     res.json({

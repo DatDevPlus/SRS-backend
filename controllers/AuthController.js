@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import User from "../models/User.js";
+import Permission from "../models/Permission.js";
+import Role from "../models/Role.js";
 export const checkUser = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
@@ -80,24 +82,63 @@ export const login = async (req, res) => {
 
     // all good
     // return token
-    console.log(user);
     const accessToken = jwt.sign(
       {
         userId: user._id,
         username: user.username,
-        role: user.role_id,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "12h" }
+    );
+    const refreshToken = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "2d" }
     );
     res.json({
       success: true,
       message: "User logged in successfully",
       accessToken,
-      role: user.role_id,
+      refreshToken,
+      role: user.role_id.role_name,
+      permission: user.role_id.permission_id,
     });
   } catch (err) {
     console.log(err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+export const addRole = async (req, res) => {
+  const { role_id } = req.body;
+  try {
+    const addRole = await User.findByIdAndUpdate(req.params.id, {
+      role_id: role_id,
+    });
+    await addRole.save();
+    res.json({
+      success: true,
+      message: "Done !",
+      user: addRole,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+export const addPermission = async (req, res) => {
+  const { permission_id, role_id } = req.body;
+  try {
+    const addPermission = await User.findByIdAndUpdate(role_id, {
+      permission_id: permission_id,
+    });
+    res.json({
+      success: true,
+      message: "Done !",
+      role: addPermission,
+    });
+  } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
