@@ -7,7 +7,7 @@ import cors from "cors";
 import authRoute from "./routes/Auth.js";
 import usersRoute from "./routes/User.js";
 import requestRoute from "./routes/Request.js";
-
+import groupRouter from "./routes/Group.js"
 const app = express();
 dotenv.config();
 
@@ -30,6 +30,8 @@ express.urlencoded({ extended: true });
 app.use("/api/auth", authRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/request", requestRoute);
+app.use("/api/group", groupRouter);
+
 app.listen(8000, () => {
   connect();
   console.log("Connected to backend!");
