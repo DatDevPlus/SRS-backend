@@ -9,15 +9,15 @@ import {
 const router = express.Router();
 
 
-router.get("/getRequestDetail/:id", Get_Request_Detail);
+router.get("/:id", Get_Request_Detail);
 //get
-router.get("/getAllRequest", Get_All_Request);
+router.get("/", Get_All_Request);
 //create
-router.post("/Create_Request", Create_Request);
+router.post("/", Create_Request);
 //Update
-router.put("/Update_Request/:id", Update_Request);
+router.put("/:id", Update_Request);
 
 //delete
-router.delete("/Delete_Request/:id", Delete_Request);
+router.delete("/:id", Delete_Request);
 
 export default router;

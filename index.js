@@ -29,8 +29,8 @@ express.urlencoded({ extended: true });
 //routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", usersRoute);
-app.use("/api/request", requestRoute);
-app.use("/api/group", groupRouter);
+app.use("/api/requests", requestRoute);
+app.use("/api/groups", groupRouter);
 
 app.listen(8000, () => {
   connect();

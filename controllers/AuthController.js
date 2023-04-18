@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
-import  User from "../models/User.js";
+import User from "../models/User.js";
 export const checkUser = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
@@ -85,7 +85,7 @@ export const login = async (req, res) => {
       {
         userId: user._id,
         username: user.username,
-        // role: user.role_id.role_name,
+        role: user.role_id,
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1d" }
@@ -94,6 +94,7 @@ export const login = async (req, res) => {
       success: true,
       message: "User logged in successfully",
       accessToken,
+      role: user.role_id,
     });
   } catch (err) {
     console.log(err);
