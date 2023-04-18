@@ -12,7 +12,7 @@ const RequestSchema = Schema(
       required: true,
     },
     quantity: {
-      type: String,
+      type: Number,
       sparse: true,
       required: true,
     },
@@ -26,22 +26,15 @@ const RequestSchema = Schema(
       sparse: true,
       required: true,
     },
-    action: {
-      type: String,
-      sparse: true,
-      required: true,
-    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
-    day_off_type_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "day_of_types",
+    day_off_type: {
+      type: String,
     },
-    day_off_time_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "day_of_times",
+    day_off_time: {
+      type: String,
     },
     status: {
       type: String,
@@ -49,7 +42,7 @@ const RequestSchema = Schema(
       required: true,
     },
     approvers_number: {
-      type: String,
+      type: Number,
       sparse: true,
       required: true,
     },
@@ -57,11 +50,7 @@ const RequestSchema = Schema(
   { timestamps: true }
 );
 RequestSchema.pre(/^find/, function (next) {
-  this.populate([
-    { path: "user_id", model: User },
-    { path: "day_off_time_id", model: DateOfTime },
-    { path: "day_off_type_id", model: DateOfType },
-  ]);
+  this.populate([{ path: "user_id", model: User }]);
   next();
 });
 const Request_detail = mongoose.model("request_detail", RequestSchema);

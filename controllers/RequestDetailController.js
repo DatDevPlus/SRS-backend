@@ -29,10 +29,9 @@ export const Create_Request = async (req, res) => {
       quantity,
       start_date,
       end_date,
-      action,
       user_id,
-      day_off_type_id,
-      day_off_time_id,
+      day_off_type,
+      day_off_time,
       status,
       approvers_number,
     } = req.body;
@@ -42,10 +41,9 @@ export const Create_Request = async (req, res) => {
       !quantity ||
       !start_date ||
       !end_date ||
-      !action ||
       !user_id ||
-      !day_off_type_id ||
-      !day_off_time_id ||
+      !day_off_type ||
+      !day_off_time ||
       !status ||
       !approvers_number
     )
@@ -57,10 +55,9 @@ export const Create_Request = async (req, res) => {
       quantity,
       start_date,
       end_date,
-      action,
       user_id,
-      day_off_type_id,
-      day_off_time_id,
+      day_off_type,
+      day_off_time,
       status,
       approvers_number,
     });
@@ -81,7 +78,6 @@ export const Update_Request = async (req, res) => {
     quantity,
     start_date,
     end_date,
-    action,
     user_id,
     date_off_time,
     date_off_type,
@@ -93,7 +89,6 @@ export const Update_Request = async (req, res) => {
     !quantity ||
     !start_date ||
     !end_date ||
-    !action ||
     !user_id ||
     !date_off_time ||
     !date_off_type ||
@@ -109,7 +104,6 @@ export const Update_Request = async (req, res) => {
       quantity,
       start_date,
       end_date,
-      action,
       user_id,
       date_off_time,
       date_off_type,
