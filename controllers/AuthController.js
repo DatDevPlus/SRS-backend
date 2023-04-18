@@ -128,15 +128,20 @@ export const addRole = async (req, res) => {
   }
 };
 export const addPermission = async (req, res) => {
-  const { permission_id, role_id } = req.body;
+  const { permission_id } = req.body;
   try {
-    const addPermission = await User.findByIdAndUpdate(role_id, {
-      permission_id: permission_id,
-    });
+    const user = await User.findById(req.params.id);
+    const condition = user.permission_id.includes(permission_id);
+    console.log(condition);
+    if (condition == false) {
+      return res.status(400).json({ msg: "Permission already exists" });
+    }
+    const addPermission = user.permission_id.push(permission_id);
+    await user.save();
     res.json({
       success: true,
       message: "Done !",
-      role: addPermission,
+      permission: user.permission_id,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });

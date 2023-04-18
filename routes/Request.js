@@ -6,12 +6,13 @@ import {
   Delete_Request,
   Get_Request_Detail,
 } from "../controllers/RequestDetailController.js";
+import { VerifyToken } from "../middleware/auth.js";
 const router = express.Router();
 
 
 router.get("/:id", Get_Request_Detail);
 //get
-router.get("/", Get_All_Request);
+router.get("/", VerifyToken, Get_All_Request);
 //create
 router.post("/", Create_Request);
 //Update

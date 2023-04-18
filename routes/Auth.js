@@ -12,5 +12,5 @@ router.get("/", VerifyToken, checkUser);
 router.post("/register", register);
 router.post("/login", login);
 router.post("/:id", addRole);
-router.post("/addPermission", addPermission);
+router.post("/addPermission/:id", addPermission);
 export default router;
