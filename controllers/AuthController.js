@@ -150,9 +150,8 @@ export const addPermission = async (req, res) => {
 };
 export const loginGoogle = async (req, res) => {
   try {
-    const { token } = req.body;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await User.findOne(decoded.email );
+    const {  photoURL, displayName, email } = req.body;
+    const user = await User.findOne(email);
     if (user) {
       const accessToken = jwt.sign(
         {
@@ -169,10 +168,10 @@ export const loginGoogle = async (req, res) => {
       const password = "password";
       const hashedPassword = await argon2.hash(password);
       const newUser = new User({
-        username: decoded.displayName,
-        email: decoded.email,
+        username: displayName,
+        email: email,
         password: hashedPassword,
-        avatar: decoded.photoURL,
+        avatar: photoURL,
         role: "null",
       });
       await newUser.save();
