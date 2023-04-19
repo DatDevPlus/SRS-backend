@@ -3,6 +3,7 @@ import argon2 from "argon2";
 import User from "../models/User.js";
 import Permission from "../models/Permission.js";
 import Role from "../models/Role.js";
+
 export const checkUser = async (req, res) => {
   console.log(req.userId);
   try {
@@ -17,6 +18,7 @@ export const checkUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const register = async (req, res) => {
   const { username, password, email, role } = req.body;
   // Simple validation
@@ -58,35 +60,33 @@ export const register = async (req, res) => {
   }
 };
 export const login = async (req, res) => {
-  const { username, password } = req.body;
-
+  const { email, password } = req.body;
   // Simple validation
-  if (!username || !password)
+  if (!email || !password)
     return res
       .status(400)
-      .json({ success: false, message: "Missing username and/or password" });
-
+      .json({ success: false, message: "Missing email or password" });
   try {
     // check existing user
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user)
       return res
         .status(400)
-        .json({ success: false, message: "Incorrect username or password" });
+        .json({ success: false, message: "Incorrect email or password" });
 
     //username found
     const passwordValid = await argon2.verify(user.password, password);
     if (!passwordValid)
       return res
         .status(400)
-        .json({ success: false, message: "Incorrect username or password" });
+        .json({ success: false, message: "Incorrect email or password" });
 
     // all good
     // return token
     const accessToken = jwt.sign(
       {
         userId: user._id,
-        username: user.username,
+        email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "12h" }
@@ -94,7 +94,7 @@ export const login = async (req, res) => {
     const refreshToken = jwt.sign(
       {
         userId: user._id,
-        username: user.username,
+        email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "2d" }
@@ -104,8 +104,8 @@ export const login = async (req, res) => {
       message: "User logged in successfully",
       accessToken,
       refreshToken,
-      role: user.role_id.role_name,
-      permission: user.role_id.permission_id,
+      role: user.role_id,
+      permissions: user.permission_id,
     });
   } catch (err) {
     console.log(err);
@@ -150,8 +150,9 @@ export const addPermission = async (req, res) => {
 };
 export const loginGoogle = async (req, res) => {
   try {
-    const { name, avatar, email } = req.body.body;
-    const user = await User.findOne({ email });
+    const { token } = req.body;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findOne(decoded.email );
     if (user) {
       const accessToken = jwt.sign(
         {
@@ -165,22 +166,30 @@ export const loginGoogle = async (req, res) => {
         .status(200)
         .json({ success: true, message: "User has exist", accessToken });
     } else {
-      const password = "password123";
+      const password = "password";
       const hashedPassword = await argon2.hash(password);
       const newUser = new User({
-        username: name,
-        email: email,
+        username: decoded.displayName,
+        email: decoded.email,
         password: hashedPassword,
-        avatar: avatar,
-        role: "user",
+        avatar: decoded.photoURL,
+        role: "null",
       });
       await newUser.save();
       // return token
       const accessToken = jwt.sign(
         { userId: newUser._id },
-        process.env.ACCESS_TOKEN_SECRET
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
       );
-
+      const refreshToken = jwt.sign(
+        {
+          userId: user._id,
+          email: user.email,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
       res.json({
         success: true,
         message: "User created successfully",

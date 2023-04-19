@@ -35,7 +35,6 @@ export const Create_Request = async (req, res) => {
       status,
       approvers_number,
     } = req.body;
-    console.log(req.body);
     if (
       !reason ||
       !quantity ||
