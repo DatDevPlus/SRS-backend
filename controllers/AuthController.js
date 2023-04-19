@@ -133,7 +133,6 @@ export const addPermission = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const condition = user.permission_id.includes(permission_id);
-    console.log(condition);
     if (condition == false) {
       return res.status(400).json({ msg: "Permission already exists" });
     }
@@ -142,7 +141,7 @@ export const addPermission = async (req, res) => {
     res.json({
       success: true,
       message: "Done !",
-      permission: user.permission_id,
+      permission: addPermission,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -152,7 +151,7 @@ export const loginGoogle = async (req, res) => {
   try {
     const { token } = req.body;
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await User.findOne(decoded.email );
+    const user = await User.findOne(decoded.email);
     if (user) {
       const accessToken = jwt.sign(
         {

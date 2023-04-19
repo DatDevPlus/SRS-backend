@@ -9,7 +9,7 @@ import {
 } from "../controllers/GroupController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
-router.post("/", VerifyToken, create_Group);
+router.post("/", create_Group);
 router.get("/", VerifyToken, get_All_Groups);
 router.get("/:id", VerifyToken, get_Group);
 router.delete("/:id", VerifyToken, delete_Group);
