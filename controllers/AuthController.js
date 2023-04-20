@@ -107,7 +107,7 @@ export const login = async (req, res) => {
       accessToken,
       refreshToken,
       name: user.username,
-      role: user.role_id,
+      role: user.role_id.role_name,
       permissions: permissions,
     });
   } catch (err) {
@@ -118,13 +118,11 @@ export const login = async (req, res) => {
 
 export const loginGoogle = async (req, res) => {
   try {
-
     const { photoURL, displayName, email } = req.body;
     const user = await User.findOne({ email }, null, { timeout: 10000 });
     if (user) {
       const accessToken = jwt.sign(
         {
-
           username: user.username,
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -137,7 +135,6 @@ export const loginGoogle = async (req, res) => {
         role: user.role_id,
         permissions: user.permission_id,
       });
-
     } else {
       const password = "password";
       const hashedPassword = await argon2.hash(password);
@@ -165,14 +162,15 @@ export const loginGoogle = async (req, res) => {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "2d" }
       );
+      const permissions = user.permission_id.map(item => item.permission_detail);
       res.json({
         success: true,
         message: "User created successfully",
         accessToken,
 
         refreshToken,
-        role: user.role_id,
-        permissions: user.permission_id,
+        role: user.role_id.role_name,
+        permissions: permissions,
 
       });
     }
