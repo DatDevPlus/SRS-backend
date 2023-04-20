@@ -100,6 +100,7 @@ export const login = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "2d" }
     );
+    const permissions = user.permission_id.map(item => item.permission_detail);
     res.json({
       success: true,
       message: "User logged in successfully",
@@ -107,7 +108,7 @@ export const login = async (req, res) => {
       refreshToken,
       name: user.username,
       role: user.role_id,
-      permissions: user.permission_id,
+      permissions: permissions,
     });
   } catch (err) {
     console.log(err);
