@@ -59,6 +59,7 @@ export const register = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
   // Simple validation
@@ -104,6 +105,7 @@ export const login = async (req, res) => {
       message: "User logged in successfully",
       accessToken,
       refreshToken,
+      name: user.username,
       role: user.role_id,
       permissions: user.permission_id,
     });
@@ -112,41 +114,7 @@ export const login = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-export const addRole = async (req, res) => {
-  const { role_id } = req.body;
-  try {
-    const addRole = await User.findByIdAndUpdate(req.params.id, {
-      role_id: role_id,
-    });
-    await addRole.save();
-    res.json({
-      success: true,
-      message: "Done !",
-      user: addRole,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-export const addPermission = async (req, res) => {
-  const { permission_id } = req.body;
-  try {
-    const user = await User.findById(req.params.id);
-    const condition = user.permission_id.includes(permission_id);
-    if (condition == false) {
-      return res.status(400).json({ msg: "Permission already exists" });
-    }
-    const addPermission = user.permission_id.push(permission_id);
-    await user.save();
-    res.json({
-      success: true,
-      message: "Done !",
-      permission: addPermission,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
+
 export const loginGoogle = async (req, res) => {
   try {
     const {  photoURL, displayName, email } = req.body;
@@ -199,3 +167,60 @@ export const loginGoogle = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+export const addRole = async (req, res) => {
+  const { role_id } = req.body;
+  try {
+    const addRole = await User.findByIdAndUpdate(req.params.id, {
+      role_id: role_id,
+    });
+    await addRole.save();
+    res.json({
+      success: true,
+      message: "Done !",
+      user: addRole,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getAllRoles = async (req, res, next) => {
+  try {
+    const roles = await Role.find();
+    res.status(200).json(roles);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const addPermission = async (req, res) => {
+  const { permission_id } = req.body;
+  try {
+    const user = await User.findById(req.params.id);
+    const condition = user.permission_id.includes(permission_id);
+    if (condition == false) {
+      return res.status(400).json({ msg: "Permission already exists" });
+    }
+    const addPermission = user.permission_id.push(permission_id);
+    await user.save();
+    res.json({
+      success: true,
+      message: "Done !",
+      permission: addPermission,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getAllPermissions = async (req, res, next) => {
+  try {
+    const permissions = await Permission.find();
+    res.status(200).json(permissions);
+  } catch (err) {
+    next(err);
+  }
+};
+
+

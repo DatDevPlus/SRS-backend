@@ -7,6 +7,6 @@ router.post('/',VerifyToken, createUser)
 router.put('/:id',VerifyToken, updateUser);
 router.delete('/:id',VerifyToken, deleteUser);
 router.get('/:id',VerifyToken, getUser);
-router.get('/',VerifyToken, getUsers);
+router.get('/', getUsers);
 
 export default router
