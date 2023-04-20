@@ -70,18 +70,35 @@ export const addID = async (req, res) => {
 };
 export const update_Group = async (req, res) => {
   try {
-    const { name, description, masters_id, staffs_id } = req.body;
-    const newGroup = new Group({
+
+    const { name, description } = req.body;
+    // Simple validation
+    if (!name)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing information !" });
+
+    let updateGroup = {
       name,
       description,
-      masters_id,
-      staffs_id,
-    });
-    await newGroup.save();
+    };
+    const updateGroupCondition = { _id: req.params.id };
+    updateGroup = await Group.findByIdAndUpdate(
+      updateGroupCondition,
+      updateGroup,
+      { new: true }
+    );
+    if (!updateGroup)
+      return res.status(401).json({
+        success: false,
+        message: "Group not found",
+      });
+
     res.json({
       success: true,
-      message: "Create complete !",
-      group: newGroup,
+      message: "Excellent progress!",
+      Group: updateGroup,
+
     });
   } catch (error) {
     console.log(error);
@@ -90,19 +107,15 @@ export const update_Group = async (req, res) => {
 };
 export const delete_Group = async (req, res) => {
   try {
-    const { name, description, masters_id, staffs_id } = req.body;
-    const newGroup = new Group({
-      name,
-      description,
-      masters_id,
-      staffs_id,
-    });
-    await newGroup.save();
-    res.json({
-      success: true,
-      message: "Create complete !",
-      group: newGroup,
-    });
+    const groupDeleteCondition = { _id: req.params.id };
+    const deleteGroup = await Group.findOneAndDelete(groupDeleteCondition);
+    if (!deleteGroup)
+      return res.status(401).json({
+        success: false,
+        message: "Group not found ",
+      });
+    res.json({ success: true, group: deleteGroup });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });

@@ -5,7 +5,8 @@ import {
   checkUser,
   addPermission,
   addRole,
-  loginGoogle
+  loginGoogle,
+
 } from "../controllers/AuthController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
