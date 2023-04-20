@@ -152,7 +152,6 @@ export const loginGoogle = async (req, res) => {
     const { photoURL, displayName, email } = req.body;
     const user = await User.findOne({ email }, null, { timeout: 10000 });
     if (user) {
-      console.log(user);
       const accessToken = jwt.sign(
         {
           username: user.username,
