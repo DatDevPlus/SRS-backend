@@ -159,9 +159,13 @@ export const loginGoogle = async (req, res) => {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "1d" }
       );
-      return res
-        .status(200)
-        .json({ success: true, message: "User has exist", accessToken });
+      return res.status(200).json({
+        success: true,
+        message: "User logged in successfully",
+        accessToken,
+        role: user.role_id,
+        permissions: user.permission_id,
+      });
     } else {
       const password = "password";
       const hashedPassword = await argon2.hash(password);
@@ -192,6 +196,8 @@ export const loginGoogle = async (req, res) => {
         message: "User created successfully",
         accessToken,
         refreshToken,
+        role: user.role_id,
+        permissions: user.permission_id,
       });
     }
   } catch (error) {
@@ -199,4 +205,3 @@ export const loginGoogle = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-

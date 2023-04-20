@@ -10,13 +10,21 @@ export const VerifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const expTime = decoded.exp;
-    req.userId = decoded.userId;
-
-    // if (expTime)
-    //   return res
-    //     .status(200)
-    //     .json({ message: "Exp time", expTime: expTime * 1000 });
-    next();
+    if (Date.now() >= expTime) {
+      const user_id = decoded.userId;
+      const refreshToken = jwt.sign(
+        { userId: user_id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
+      // The token has expired
+      return res
+        .status(200)
+        .json({ message: "Token has expired", refreshToken });
+    } else {
+      req.userId = decoded.userId;
+      next();
+    }
   } catch (error) {
     console.log(error);
     return res.status(403).json({ success: false, message: "Invalid token" });
