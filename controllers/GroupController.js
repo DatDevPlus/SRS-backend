@@ -70,19 +70,7 @@ export const addID = async (req, res) => {
 };
 export const update_Group = async (req, res) => {
   try {
-    const { name, description, masters_id, staffs_id } = req.body;
-    const newGroup = new Group({
-      name,
-      description,
-      masters_id,
-      staffs_id,
-    });
-    await newGroup.save();
-    res.json({
-      success: true,
-      message: "Create complete !",
-      group: newGroup,
-    });
+   
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });

@@ -36,6 +36,9 @@ const UserSchema = new mongoose.Schema(
         ref: "permission",
       },
     ],
+    slack_id: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

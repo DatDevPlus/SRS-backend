@@ -62,10 +62,10 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   // Simple validation
-  if (!email || !password)
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing email or password" });
+  // if (!email || !password)
+  //   return res
+  //     .status(400)
+  //     .json({ success: false, message: "Missing email or password" });
   try {
     // check existing user
     const user = await User.findOne({ email });
@@ -149,12 +149,12 @@ export const addPermission = async (req, res) => {
 };
 export const loginGoogle = async (req, res) => {
   try {
-    const {  photoURL, displayName, email } = req.body;
-    const user = await User.findOne(email);
+    const { photoURL, displayName, email } = req.body;
+    const user = await User.findOne({ email }, null, { timeout: 10000 });
     if (user) {
+      console.log(user);
       const accessToken = jwt.sign(
         {
-          userId: user._id,
           username: user.username,
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -182,8 +182,8 @@ export const loginGoogle = async (req, res) => {
       );
       const refreshToken = jwt.sign(
         {
-          userId: user._id,
-          email: user.email,
+          userId: newUser._id,
+          email: newUser.email,
         },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "2d" }
@@ -192,6 +192,7 @@ export const loginGoogle = async (req, res) => {
         success: true,
         message: "User created successfully",
         accessToken,
+        refreshToken,
       });
     }
   } catch (error) {
@@ -199,3 +200,4 @@ export const loginGoogle = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
