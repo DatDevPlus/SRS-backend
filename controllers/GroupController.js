@@ -70,6 +70,7 @@ export const addID = async (req, res) => {
 };
 export const update_Group = async (req, res) => {
   try {
+
     const { name, description } = req.body;
     // Simple validation
     if (!name)
@@ -97,6 +98,7 @@ export const update_Group = async (req, res) => {
       success: true,
       message: "Excellent progress!",
       Group: updateGroup,
+
     });
   } catch (error) {
     console.log(error);
@@ -113,6 +115,7 @@ export const delete_Group = async (req, res) => {
         message: "Group not found ",
       });
     res.json({ success: true, group: deleteGroup });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
