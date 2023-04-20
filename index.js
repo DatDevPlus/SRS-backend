@@ -7,7 +7,9 @@ import cors from "cors";
 import authRoute from "./routes/Auth.js";
 import usersRoute from "./routes/User.js";
 import requestRoute from "./routes/Request.js";
-import groupRouter from "./routes/Group.js"
+import groupRoute from "./routes/Group.js";
+import permissionRoute from "./routes/Permission.js";
+
 const app = express();
 dotenv.config();
 
@@ -30,7 +32,8 @@ express.urlencoded({ extended: true });
 app.use("/api/auth", authRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/requests", requestRoute);
-app.use("/api/groups", groupRouter);
+app.use("/api/groups", groupRoute);
+app.use("/api/permissions", permissionRoute);
 
 app.listen(8000, () => {
   connect();

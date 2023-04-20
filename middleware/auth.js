@@ -11,7 +11,8 @@ export const VerifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const expTime = decoded.exp;
-    if (Date.now() >= expTime*1000) {
+    //
+    if (Date.now() >= expTime * 1000) {
       const user_id = decoded.userId;
       const refreshToken = jwt.sign(
         { userId: user_id },
@@ -32,4 +33,5 @@ export const VerifyToken = (req, res, next) => {
     return res.status(403).json({ success: false, message: "Invalid token" });
   }
 };
+
 export const refreshToken = (req, res) => {};

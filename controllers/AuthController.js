@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import User from "../models/User.js";
-import Permission from "../models/Permission.js";
-import Role from "../models/Role.js";
 
 export const checkUser = async (req, res) => {
   console.log(req.userId);
@@ -106,6 +104,7 @@ export const login = async (req, res) => {
       message: "User logged in successfully",
       accessToken,
       refreshToken,
+      name: user.username,
       role: user.role_id,
       permissions: user.permission_id,
     });
@@ -130,6 +129,7 @@ export const addRole = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const addPermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
@@ -149,6 +149,27 @@ export const addPermission = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+export const removePermission = async (req, res) => {
+  const { permission_id } = req.body;
+  try {
+    const user = await User.findById(req.params.id);
+    const condition = user.permission_id.includes(permission_id);
+    if (condition == false) {
+      return res.status(400).json({ msg: "Permission already exists" });
+    }
+    const removedPermission = user.permission_id.pop(permission_id);
+    await user.save();
+    res.json({
+      success: true,
+      message: "Done !",
+      permission: removedPermission,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 export const loginGoogle = async (req, res) => {
   try {
 
