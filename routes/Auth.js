@@ -7,11 +7,13 @@ import {
   addRole,
   loginGoogle,
   removePermission,
+  getNewAccessToken
 
 } from "../controllers/AuthController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
+router.post("/get-new-access-token", getNewAccessToken);
 
 router.post("/login", login);
 router.post("/login-with-google", loginGoogle);
