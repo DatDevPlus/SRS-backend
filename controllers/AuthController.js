@@ -106,8 +106,9 @@ export const login = async (req, res) => {
       message: "User logged in successfully",
       accessToken,
       refreshToken,
-      role: user.role_id,
-      permissions: user.permission_id,
+      name: user.username,
+      role: user.role_id.role_name,
+      permissions: permissions,
     });
   } catch (err) {
     console.log(err);
