@@ -146,7 +146,7 @@ export const loginGoogle = async (req, res) => {
         success: true,
         message: "User logged in successfully",
         accessToken,
-        accessTokenLifeTime: jwt.decode(accessToken).exp*1000,
+        accessTokenLifeTime: jwt.decode(accessToken).exp * 1000,
         refreshToken,
         role: user.role_id.role_name,
         permissions: permissions,
@@ -254,5 +254,37 @@ export const removePermission = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+export const getNewAccessToken = (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken)
+    return res
+      .status(404)
+      .json({ success: false, message: " Refresh token not found" });
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET);
+    const expTime = decoded.exp;
+    if (new Date.now() < expTime * 1000) {
+      const user_id = decoded.userId;
+      const accessToken = jwt.sign(
+        { userId: user_id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
+      req.userId = decoded.userId;
+      return res
+        .status(200)
+        .json({
+          message: "New access token created successfully",
+          accessToken,
+        });
+    } else {
+      return res
+        .status(400)
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json({ success: false, message: "Invalid token" });
   }
 };
