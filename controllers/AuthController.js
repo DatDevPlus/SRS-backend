@@ -144,7 +144,6 @@ export const loginGoogle = async (req, res) => {
       const permissions = user.permission_id?.map(
         (item) => item.permission_detail
       );
-
       return res.status(200).json({
         success: true,
         message: "User logged in successfully",
@@ -156,7 +155,6 @@ export const loginGoogle = async (req, res) => {
       });
     } else {
       const hashedPassword = await argon2.hash("password");
-
       const newUser = new User({
         username: displayName,
         email: email,
@@ -282,8 +280,7 @@ export const getNewAccessToken = (req, res) => {
           accessTokenLifeTime: jwt.decode(accessToken).exp,
         });
     } else {
-      return res
-        .status(400)
+      return res.status(400);
     }
   } catch (error) {
     console.log(error);
