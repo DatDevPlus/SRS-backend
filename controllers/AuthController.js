@@ -51,6 +51,7 @@ export const register = async (req, res) => {
       msg: "Register Success!",
       success: true,
       accessToken,
+      accessTokenLifeTime: jwt.decode(accessToken).exp,
     });
   } catch (error) {
     console.log(error);
@@ -94,13 +95,12 @@ export const login = async (req, res) => {
     const refreshToken = jwt.sign(
       {
         userId: user._id,
-        email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "2d" }
     );
 
-    const permissions = user.permission_id.map(
+    const permissions = user.permission_id?.map(
       (item) => item.permission_detail
     );
 
@@ -108,9 +108,10 @@ export const login = async (req, res) => {
       success: true,
       message: "User logged in successfully",
       accessToken,
+      accessTokenLifeTime: jwt.decode(accessToken).exp,
       refreshToken,
       name: user.username,
-      role: user.role_id.role_name,
+      role: user.role_id?.role_name,
       permissions: permissions,
     });
   } catch (err) {
@@ -133,7 +134,9 @@ export const loginGoogle = async (req, res) => {
       );
 
       const refreshToken = jwt.sign(
-        { username: user.username },
+        {
+          userId: user._id,
+        },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "2d" }
       );
@@ -145,7 +148,7 @@ export const loginGoogle = async (req, res) => {
         success: true,
         message: "User logged in successfully",
         accessToken,
-        accessTokenLifeTime: jwt.decode(accessToken).exp * 1000,
+        accessTokenLifeTime: jwt.decode(accessToken).exp,
         refreshToken,
         role: user.role_id?.role_name,
         permissions: permissions,
@@ -158,6 +161,7 @@ export const loginGoogle = async (req, res) => {
         password: hashedPassword,
         avatar: photoURL,
         role: "",
+        permission_id: [],
       });
       await newUser.save();
 
@@ -170,13 +174,12 @@ export const loginGoogle = async (req, res) => {
       const refreshToken = jwt.sign(
         {
           userId: newUser._id,
-          email: newUser.email,
         },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "2d" }
       );
 
-      const permissions = user.permission_id.map(
+      const permissions = user.permission_id?.map(
         (item) => item.permission_detail
       );
 
@@ -184,10 +187,8 @@ export const loginGoogle = async (req, res) => {
         success: true,
         message: "User created successfully",
         accessToken,
-        accessTokenLifeTime: new Date().getTime() + jwt.decode(accessToken).exp,
+        accessTokenLifeTime: jwt.decode(accessToken).exp,
         refreshToken,
-        refreshTokenLifeTime:
-          new Date().getTime() + jwt.decode(refreshToken).exp,
         role: user.role_id.role_name,
         permissions: permissions,
       });
@@ -254,6 +255,7 @@ export const removePermission = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const getNewAccessToken = (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken)
@@ -268,13 +270,15 @@ export const getNewAccessToken = (req, res) => {
       const accessToken = jwt.sign(
         { userId: user_id },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "2d" }
+        { expiresIn: "12h" }
       );
-      req.userId = decoded.userId;
-      return res.status(200).json({
-        message: "New access token created successfully",
-        accessToken,
-      });
+      return res
+        .status(200)
+        .json({
+          message: "New access token created successfully",
+          accessToken,
+          accessTokenLifeTime: jwt.decode(accessToken).exp,
+        });
     } else {
       return res.status(400);
     }
