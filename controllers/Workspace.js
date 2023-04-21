@@ -25,106 +25,90 @@ export const Get_All_Workspace = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-export const Create_Workspace = async (req, res) => {
-//   try {
-//     const { workspace_name, description,Manager_id } = req.body;
-//     if (
-//       !workspace_name ||
-//       !description ||
-   
-//     )
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Missing information" });
-//     const newWorkspace = new Workspace({
-//         workspace_name,
-//         description
-//     });
-//     await newWorkspace.save();
-//     res.json({
-//       success: true,
-//       message: "Create complete !",
-//       category: newRequest,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ success: false, message: "Internal server error" });
-//   }
-};
-export const Update_Request = async (req, res) => {
-  const {
-    reason,
-    quantity,
-    start_date,
-    end_date,
-    user_id,
-    date_off_time,
-    date_off_type,
-    status,
-    approvers_number,
-  } = req.body;
-  if (
-    !reason ||
-    !quantity ||
-    !start_date ||
-    !end_date ||
-    !user_id ||
-    !date_off_time ||
-    !date_off_type ||
-    !status ||
-    !approvers_number
-  )
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing information" });
+export const addRoleWorkspace = async (req, res) => {
+  const { Manager_id } = req.body;
   try {
-    let updateRequest = {
-      reason,
-      quantity,
-      start_date,
-      end_date,
-      user_id,
-      date_off_time,
-      date_off_type,
-      status,
-      approvers_number,
-    };
-    const updateRequestCondition = { _id: req.params.id };
-    updateRequest = await Request_detail.findByIdAndUpdate(
-      updateRequestCondition,
-      updateRequest,
-      { new: true }
-    );
-    if (!updateRequest)
-      return res.status(401).json({
-        success: false,
-        message: "Request not found",
-      });
-
+    const addRole = await Workspace.findByIdAndUpdate(req.params.id, {
+      Manager_id: Manager_id,
+    });
+    await addRole.save();
     res.json({
       success: true,
-      message: "Excellent progress!",
-      req: updateRequest,
+      message: "Done !",
+      work_space: addRole,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+export const Create_Workspace = async (req, res) => {
+  try {
+    const { workspace_name, description, Manager_id } = req.body;
+    if (!workspace_name || !description)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing information" });
+    const newWorkspace = new Workspace({
+      workspace_name,
+      description,
+      Manager_id: [],
+    });
+    await newWorkspace.save();
+    res.json({
+      success: true,
+      message: "Create complete !",
+      work_space: newWorkspace,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
-export const Delete_Request = async (req, res) => {
+export const Update_Workspace = async (req, res) => {
+  const { workspace_name, description, Manager_id } = req.body;
+  if (!workspace_name || !description)
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing information" });
   try {
-    const requestDeleteCondition = { _id: req.params.id };
-    const deleteRequest = await Request_detail.findOneAndDelete(
-      requestDeleteCondition
+    let updateWorkspace = {
+      workspace_name,
+      description,
+      Manager_id: [],
+    };
+    const updateWorkspaceCondition = { _id: req.params.id };
+    updateWorkspace = await Workspace.findByIdAndUpdate(
+      updateWorkspaceCondition,
+      updateWorkspace,
+      { new: true }
     );
-
-    if (!deleteRequest)
+    if (!updateWorkspace)
+      return res.status(401).json({
+        success: false,
+        message: "Workspace not found",
+      });
+    res.json({
+      success: true,
+      message: "Excellent progress!",
+      req: updateWorkspace,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+export const Delete_Workspace = async (req, res) => {
+  try {
+    const requestWorkspaceCondition = { _id: req.params.id };
+    const deleteWorkspace = await Workspace.findOneAndDelete(
+      requestWorkspaceCondition
+    );
+    if (!deleteWorkspace)
       return res.status(401).json({
         success: false,
         message: "Request not found ",
       });
-    res.json({ success: true, req: deleteRequest });
+    res.json({ success: true, req: deleteWorkspace });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });

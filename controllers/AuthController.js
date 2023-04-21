@@ -138,22 +138,20 @@ export const loginGoogle = async (req, res) => {
         { expiresIn: "2d" }
       );
 
-      const permissions = user.permission_id.map(
+      const permissions = user.permission_id?.map(
         (item) => item.permission_detail
       );
-
       return res.status(200).json({
         success: true,
         message: "User logged in successfully",
         accessToken,
         accessTokenLifeTime: jwt.decode(accessToken).exp * 1000,
         refreshToken,
-        role: user.role_id.role_name,
+        role: user.role_id?.role_name,
         permissions: permissions,
       });
     } else {
       const hashedPassword = await argon2.hash("password");
-
       const newUser = new User({
         username: displayName,
         email: email,
@@ -273,15 +271,12 @@ export const getNewAccessToken = (req, res) => {
         { expiresIn: "2d" }
       );
       req.userId = decoded.userId;
-      return res
-        .status(200)
-        .json({
-          message: "New access token created successfully",
-          accessToken,
-        });
+      return res.status(200).json({
+        message: "New access token created successfully",
+        accessToken,
+      });
     } else {
-      return res
-        .status(400)
+      return res.status(400);
     }
   } catch (error) {
     console.log(error);
