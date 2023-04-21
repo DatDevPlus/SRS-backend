@@ -22,4 +22,6 @@ router.post("/:id", VerifyToken, addRole);
 router.post("/add-permission/:id", VerifyToken, addPermission);
 router.post("/remove-permission/:id", VerifyToken, removePermission);
 
+router.get("/roles", VerifyToken, removePermission);
+
 export default router;

@@ -60,30 +60,28 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  // Simple validation
-
-  if (!email || !password)
+  if (!email || !password) {
     return res
       .status(400)
       .json({ success: false, message: "Missing email or password" });
+  }
 
   try {
-    // check existing user
     const user = await User.findOne({ email });
-    if (!user)
+
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, message: "Incorrect email or password" });
+    }
 
-    //username found
     const passwordValid = await argon2.verify(user.password, password);
-    if (!passwordValid)
+    if (!passwordValid) {
       return res
         .status(400)
         .json({ success: false, message: "Incorrect email or password" });
+    }
 
-    // all good
-    // return token
     const accessToken = jwt.sign(
       {
         userId: user._id,
@@ -92,6 +90,7 @@ export const login = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "12h" }
     );
+
     const refreshToken = jwt.sign(
       {
         userId: user._id,
@@ -100,12 +99,18 @@ export const login = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "2d" }
     );
-    const permissions = user.permission_id.map(item => item.permission_detail);
+
+    const permissions = user.permission_id.map(
+      (item) => item.permission_detail
+    );
+
     res.json({
       success: true,
       message: "User logged in successfully",
       accessToken,
+      accessTokenLifeTime: new Date().getTime() + jwt.decode(accessToken).exp,
       refreshToken,
+      refreshTokenLifeTime: new Date().getTime() + jwt.decode(refreshToken).exp,
       name: user.username,
       role: user.role_id.role_name,
       permissions: permissions,
@@ -119,59 +124,76 @@ export const login = async (req, res) => {
 export const loginGoogle = async (req, res) => {
   try {
     const { photoURL, displayName, email } = req.body;
+
     const user = await User.findOne({ email }, null, { timeout: 10000 });
+
     if (user) {
       const accessToken = jwt.sign(
-        {
-          username: user.username,
-        },
+        { username: user.username },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1d" }
+        { expiresIn: "12h" }
       );
+
+      const refreshToken = jwt.sign(
+        { username: user.username },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
+
+      const permissions = user.permission_id.map(
+        (item) => item.permission_detail
+      );
+
       return res.status(200).json({
         success: true,
         message: "User logged in successfully",
         accessToken,
-        role: user.role_id,
-        permissions: user.permission_id,
+        accessTokenLifeTime: jwt.decode(accessToken).exp*1000,
+        refreshToken,
+        role: user.role_id.role_name,
+        permissions: permissions,
       });
     } else {
-      const password = "password";
-      const hashedPassword = await argon2.hash(password);
+      const hashedPassword = await argon2.hash("password");
+
       const newUser = new User({
         username: displayName,
         email: email,
         password: hashedPassword,
         avatar: photoURL,
-        role: "null",
+        role: "",
       });
       await newUser.save();
-      // return token
+
       const accessToken = jwt.sign(
         { userId: newUser._id },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "2d" }
+        { expiresIn: "12h" }
       );
+
       const refreshToken = jwt.sign(
         {
-
           userId: newUser._id,
           email: newUser.email,
-
         },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "2d" }
       );
-      const permissions = user.permission_id.map(item => item.permission_detail);
+
+      const permissions = user.permission_id.map(
+        (item) => item.permission_detail
+      );
+
       res.json({
         success: true,
         message: "User created successfully",
         accessToken,
-
+        accessTokenLifeTime: new Date().getTime() + jwt.decode(accessToken).exp,
         refreshToken,
+        refreshTokenLifeTime:
+          new Date().getTime() + jwt.decode(refreshToken).exp,
         role: user.role_id.role_name,
         permissions: permissions,
-
       });
     }
   } catch (error) {
