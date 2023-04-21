@@ -1,75 +1,55 @@
-import Request_detail from "../models/RequestDetail.js";
-export const Get_Request_Detail = async (req, res) => {
+import Workspace from "../models/Workspace";
+
+export const Get_Workspace_Detail = async (req, res) => {
   try {
-    const request = await Request_detail.findById({
+    const workspace = await Workspace.findById({
       _id: req.params.id,
     });
-    if (!request) {
-      res.status(404).json({ success: false, message: "Request is not exist" });
+    if (!workspace) {
+      res
+        .status(404)
+        .json({ success: false, message: "Workspace is not exist" });
     }
-    if (request) res.json({ success: true, request });
+    if (workspace) res.json({ success: true, workspace });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-export const Get_All_Request = async (req, res) => {
+export const Get_All_Workspace = async (req, res) => {
   try {
-    const request = await Request_detail.find().sort([["createdAt", -1]]);
-    res.json({ success: true, request });
+    const workspace = await Workspace.find().sort([["createdAt", -1]]);
+    res.json({ success: true, workspace });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-export const Create_Request = async (req, res) => {
-  try {
-    const {
-      reason,
-      quantity,
-      start_date,
-      end_date,
-      user_id,
-      day_off_type,
-      day_off_time,
-      status,
-      approvers_number,
-    } = req.body;
-    if (
-      !reason ||
-      !quantity ||
-      !start_date ||
-      !end_date ||
-      !user_id ||
-      !day_off_type ||
-      !day_off_time ||
-      !status ||
-      !approvers_number
-    )
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing information" });
-    const newRequest = new Request_detail({
-      reason,
-      quantity,
-      start_date,
-      end_date,
-      user_id: req.userId,
-      day_off_type,
-      day_off_time,
-      status,
-      approvers_number,
-    });
-    await newRequest.save();
-    res.json({
-      success: true,
-      message: "Create complete !",
-      category: newRequest,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
+export const Create_Workspace = async (req, res) => {
+//   try {
+//     const { workspace_name, description,Manager_id } = req.body;
+//     if (
+//       !workspace_name ||
+//       !description ||
+   
+//     )
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Missing information" });
+//     const newWorkspace = new Workspace({
+//         workspace_name,
+//         description
+//     });
+//     await newWorkspace.save();
+//     res.json({
+//       success: true,
+//       message: "Create complete !",
+//       category: newRequest,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ success: false, message: "Internal server error" });
+//   }
 };
 export const Update_Request = async (req, res) => {
   const {
@@ -103,7 +83,7 @@ export const Update_Request = async (req, res) => {
       quantity,
       start_date,
       end_date,
-      user_id:req.userId,
+      user_id,
       date_off_time,
       date_off_type,
       status,
