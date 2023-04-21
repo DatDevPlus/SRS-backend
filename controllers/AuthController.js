@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import User from "../models/User.js";
-import Permission from "../models/Permission.js";
-import Role from "../models/Role.js";
 
 export const checkUser = async (req, res) => {
   console.log(req.userId);
@@ -59,32 +57,31 @@ export const register = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  // Simple validation
-
-  if (!email || !password)
+  if (!email || !password) {
     return res
       .status(400)
       .json({ success: false, message: "Missing email or password" });
+  }
 
   try {
-    // check existing user
     const user = await User.findOne({ email });
-    if (!user)
+
+    if (!user) {
       return res
         .status(400)
         .json({ success: false, message: "Incorrect email or password" });
+    }
 
-    //username found
     const passwordValid = await argon2.verify(user.password, password);
-    if (!passwordValid)
+    if (!passwordValid) {
       return res
         .status(400)
         .json({ success: false, message: "Incorrect email or password" });
+    }
 
-    // all good
-    // return token
     const accessToken = jwt.sign(
       {
         userId: user._id,
@@ -93,6 +90,7 @@ export const login = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "12h" }
     );
+
     const refreshToken = jwt.sign(
       {
         userId: user._id,
@@ -101,6 +99,11 @@ export const login = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "2d" }
     );
+
+    const permissions = user.permission_id.map(
+      (item) => item.permission_detail
+    );
+
     res.json({
       success: true,
       message: "User logged in successfully",
@@ -115,6 +118,88 @@ export const login = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+export const loginGoogle = async (req, res) => {
+  try {
+    const { photoURL, displayName, email } = req.body;
+
+    const user = await User.findOne({ email }, null, { timeout: 10000 });
+
+    if (user) {
+      const accessToken = jwt.sign(
+        { username: user.username },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "12h" }
+      );
+
+      const refreshToken = jwt.sign(
+        { username: user.username },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
+
+      const permissions = user.permission_id.map(
+        (item) => item.permission_detail
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "User logged in successfully",
+        accessToken,
+        accessTokenLifeTime: jwt.decode(accessToken).exp*1000,
+        refreshToken,
+        role: user.role_id.role_name,
+        permissions: permissions,
+      });
+    } else {
+      const hashedPassword = await argon2.hash("password");
+
+      const newUser = new User({
+        username: displayName,
+        email: email,
+        password: hashedPassword,
+        avatar: photoURL,
+        role: "",
+      });
+      await newUser.save();
+
+      const accessToken = jwt.sign(
+        { userId: newUser._id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "12h" }
+      );
+
+      const refreshToken = jwt.sign(
+        {
+          userId: newUser._id,
+          email: newUser.email,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
+
+      const permissions = user.permission_id.map(
+        (item) => item.permission_detail
+      );
+
+      res.json({
+        success: true,
+        message: "User created successfully",
+        accessToken,
+        accessTokenLifeTime: new Date().getTime() + jwt.decode(accessToken).exp,
+        refreshToken,
+        refreshTokenLifeTime:
+          new Date().getTime() + jwt.decode(refreshToken).exp,
+        role: user.role_id.role_name,
+        permissions: permissions,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 export const addRole = async (req, res) => {
   const { role_id } = req.body;
   try {
@@ -131,6 +216,7 @@ export const addRole = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const addPermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
@@ -150,68 +236,23 @@ export const addPermission = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-export const loginGoogle = async (req, res) => {
+
+export const removePermission = async (req, res) => {
+  const { permission_id } = req.body;
   try {
-
-    const { photoURL, displayName, email } = req.body;
-    const user = await User.findOne({ email }, null, { timeout: 10000 });
-    if (user) {
-      const accessToken = jwt.sign(
-        {
-
-          username: user.username,
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1d" }
-      );
-      return res.status(200).json({
-        success: true,
-        message: "User logged in successfully",
-        accessToken,
-        role: user.role_id,
-        permissions: user.permission_id,
-      });
-
-    } else {
-      const password = "password";
-      const hashedPassword = await argon2.hash(password);
-      const newUser = new User({
-        username: displayName,
-        email: email,
-        password: hashedPassword,
-        avatar: photoURL,
-        role: "null",
-      });
-      await newUser.save();
-      // return token
-      const accessToken = jwt.sign(
-        { userId: newUser._id },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "2d" }
-      );
-      const refreshToken = jwt.sign(
-        {
-
-          userId: newUser._id,
-          email: newUser.email,
-
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "2d" }
-      );
-      res.json({
-        success: true,
-        message: "User created successfully",
-        accessToken,
-
-        refreshToken,
-        role: user.role_id,
-        permissions: user.permission_id,
-
-      });
+    const user = await User.findById(req.params.id);
+    const condition = user.permission_id.includes(permission_id);
+    if (condition) {
+      return res.status(400).json({ msg: "Permission already exists" });
     }
+    const removedPermission = user.permission_id.pop(permission_id);
+    await user.save();
+    res.json({
+      success: true,
+      message: "Done !",
+      permission: removedPermission,
+    });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
