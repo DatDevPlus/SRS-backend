@@ -221,9 +221,9 @@ export const addPermission = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const condition = user.permission_id.includes(permission_id);
-    if (condition == false) {
-      return res.status(400).json({ msg: "Permission already exists" });
-    }
+    // if (condition == false) {
+    //   return res.status(400).json({ msg: "Permission already exists" });
+    // }
     const addPermission = user.permission_id.push(permission_id);
     await user.save();
     res.json({
@@ -241,9 +241,9 @@ export const removePermission = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const condition = user.permission_id.includes(permission_id);
-    if (condition) {
-      return res.status(400).json({ msg: "Permission already exists" });
-    }
+    // if (condition) {
+    //   return res.status(400).json({ msg: "Permission already exists" });
+    // }
     const removedPermission = user.permission_id.pop(permission_id);
     await user.save();
     res.json({
