@@ -9,7 +9,7 @@ import usersRoute from "./routes/User.js";
 import requestRoute from "./routes/Request.js";
 import groupRoute from "./routes/Group.js";
 import permissionRoute from "./routes/Permission.js";
-
+import workspaceRouter from "./routes/WorkSpace.js";
 const app = express();
 dotenv.config();
 
@@ -34,6 +34,7 @@ app.use("/api/users", usersRoute);
 app.use("/api/requests", requestRoute);
 app.use("/api/groups", groupRoute);
 app.use("/api/permissions", permissionRoute);
+app.use("/api/workspace", workspaceRouter);
 
 app.listen(8000, () => {
   connect();
