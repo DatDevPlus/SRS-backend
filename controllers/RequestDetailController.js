@@ -1,4 +1,6 @@
 import Request_detail from "../models/RequestDetail.js";
+import jwt from "jsonwebtoken";
+
 export const Get_Request_Detail = async (req, res) => {
   try {
     const request = await Request_detail.findById({
@@ -13,6 +15,7 @@ export const Get_Request_Detail = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Get_All_Request = async (req, res) => {
   try {
     const request = await Request_detail.find().sort([["createdAt", -1]]);
@@ -22,6 +25,7 @@ export const Get_All_Request = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Create_Request = async (req, res) => {
   try {
     const {
@@ -29,7 +33,6 @@ export const Create_Request = async (req, res) => {
       quantity,
       start_date,
       end_date,
-      user_id,
       day_off_type,
       day_off_time,
       status,
@@ -40,21 +43,25 @@ export const Create_Request = async (req, res) => {
       !quantity ||
       !start_date ||
       !end_date ||
-      !user_id ||
       !day_off_type ||
       !day_off_time ||
       !status ||
       !approvers_number
-    )
+    ) {
       return res
         .status(400)
         .json({ success: false, message: "Missing information" });
+    }
+    const authHeader = req.header("Authorization");
+    const accessToken = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user_id = decoded.userId;
     const newRequest = new Request_detail({
       reason,
       quantity,
       start_date,
       end_date,
-      user_id: req.userId,
+      user_id,
       day_off_type,
       day_off_time,
       status,
@@ -63,7 +70,7 @@ export const Create_Request = async (req, res) => {
     await newRequest.save();
     res.json({
       success: true,
-      message: "Create complete !",
+      message: "Create day off request successfully!",
       category: newRequest,
     });
   } catch (error) {
@@ -77,7 +84,6 @@ export const Update_Request = async (req, res) => {
     quantity,
     start_date,
     end_date,
-    user_id,
     date_off_time,
     date_off_type,
     status,
@@ -88,7 +94,6 @@ export const Update_Request = async (req, res) => {
     !quantity ||
     !start_date ||
     !end_date ||
-    !user_id ||
     !date_off_time ||
     !date_off_type ||
     !status ||
@@ -98,12 +103,16 @@ export const Update_Request = async (req, res) => {
       .status(400)
       .json({ success: false, message: "Missing information" });
   try {
+    const authHeader = req.header("Authorization");
+    const accessToken = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user_id = decoded.userId;
     let updateRequest = {
       reason,
       quantity,
       start_date,
       end_date,
-      user_id:req.userId,
+      user_id,
       date_off_time,
       date_off_type,
       status,

@@ -89,7 +89,7 @@ export const login = async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "2h" }  ////
+      { expiresIn: "2h" }  
     );
 
     const refreshToken = jwt.sign(
@@ -258,6 +258,7 @@ export const removePermission = async (req, res) => {
 
 export const getNewAccessToken = (req, res) => {
   const { refreshToken } = req.body;
+  console.log(refreshToken)
   if (!refreshToken)
     return res
       .status(404)
@@ -265,7 +266,7 @@ export const getNewAccessToken = (req, res) => {
   try {
     const decoded = jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET);
     const expTime = decoded.exp;
-    if (new Date.now() < expTime * 1000) {
+    if (Date.now() < expTime * 1000) {
       const user_id = decoded.userId;
       const accessToken = jwt.sign(
         { userId: user_id },
