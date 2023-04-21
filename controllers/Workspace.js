@@ -1,4 +1,4 @@
-import Workspace from "../models/Workspace";
+import Workspace from "../models/Workspace.js";
 
 export const Get_Workspace_Detail = async (req, res) => {
   try {
