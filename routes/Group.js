@@ -6,12 +6,19 @@ import {
   delete_Group,
   update_Group,
   create_Group,
-  addID,
+  addGroupStaff,
+  removeGroupStaff,
+  assignStaffAsMaster,
+  assignMasterAsStaff
 } from "../controllers/GroupController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
-router.post("/", create_Group);
-router.post("/:id", addID);
+router.put('/add-group-staff', VerifyToken, addGroupStaff);
+router.put('/remove-group-staff', VerifyToken, removeGroupStaff);
+router.put('/assign-staff-as-master', VerifyToken, assignStaffAsMaster);
+router.put('/assign-master-as-staff', VerifyToken, assignMasterAsStaff);
+
+router.post("/", VerifyToken, create_Group);
 router.get("/", VerifyToken, get_All_Groups);
 router.get("/:id", VerifyToken, get_Group);
 router.delete("/:id", VerifyToken, delete_Group);

@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 
 export const createUser = async (req, res, next) => {
   try {
-    console.log("hi");
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(req.body.password, salt);
 
@@ -18,6 +17,7 @@ export const createUser = async (req, res, next) => {
     next(err);
   }
 };
+
 export const updateUser = async (req, res, next) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
@@ -30,6 +30,7 @@ export const updateUser = async (req, res, next) => {
     next(err);
   }
 };
+
 export const deleteUser = async (req, res, next) => {
   try {
     await User.findByIdAndDelete(req.params.id);
