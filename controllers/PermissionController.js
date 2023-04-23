@@ -14,7 +14,6 @@ export const getAllPermissions = async (req, res) => {
 export const createPermission = async (req, res) => {
     try {
       const { permission_detail } = req.body;
-      console.log(req.body);
       const newPermission = new Permission({
         permission_detail,
       });
