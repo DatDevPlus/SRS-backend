@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 import User from "../models/User.js";
+import Role from "../models/Role.js";
 
 export const checkUser = async (req, res) => {
   console.log(req.userId);
@@ -215,7 +216,14 @@ export const addRole = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
+export const getRole = async (req, res) => {
+  try {
+    const role = await Role.find().sort([["createdAt", -1]]);
+    res.json({ success: true, role });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 export const addPermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
@@ -273,13 +281,11 @@ export const getNewAccessToken = (req, res) => {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "12h" }
       );
-      return res
-        .status(200)
-        .json({
-          message: "New access token created successfully",
-          accessToken,
-          accessTokenLifeTime: jwt.decode(accessToken).exp,
-        });
+      return res.status(200).json({
+        message: "New access token created successfully",
+        accessToken,
+        accessTokenLifeTime: jwt.decode(accessToken).exp,
+      });
     } else {
       return res.status(400);
     }
