@@ -7,8 +7,8 @@ import {
   addRole,
   loginGoogle,
   removePermission,
-  getNewAccessToken
-
+  getNewAccessToken,
+  getRole,
 } from "../controllers/AuthController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
@@ -18,12 +18,11 @@ router.post("/get-new-access-token", getNewAccessToken);
 router.post("/login", login);
 router.post("/login-with-google", loginGoogle);
 router.post("/register", register);
-
+router.get("/getAllRole", getRole);
 router.get("/", VerifyToken, checkUser);
 router.post("/:id", VerifyToken, addRole);
 router.post("/add-permission/:id", VerifyToken, addPermission);
 router.post("/remove-permission/:id", VerifyToken, removePermission);
-
 router.get("/roles", VerifyToken, removePermission);
 
 export default router;
