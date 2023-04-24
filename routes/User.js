@@ -10,7 +10,7 @@ import {
 } from "../controllers/UserController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
-router.post("/", VerifyToken, createUser);
+router.post("/",VerifyToken, createUser);
 router.put("/:id", VerifyToken, updateUser);
 router.put("/editAccount", VerifyToken, editAccountUser);
 router.delete("/:id", VerifyToken, deleteUser);

@@ -1,14 +1,11 @@
 import User from "../models/User.js";
-import bcrypt from "bcrypt";
-
+import argon2 from "argon2";
 export const createUser = async (req, res, next) => {
   try {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(req.body.password, salt);
-
+    const hashedPassword = await argon2.hash(req.body.password);
     const newUser = new User({
       ...req.body,
-      password: hash,
+      password: hashedPassword,
     });
 
     await newUser.save();

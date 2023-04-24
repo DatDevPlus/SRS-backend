@@ -39,7 +39,6 @@ app.use("/api/permissions", permissionRoute);
 app.use("/api/workspace", workspaceRouter);
 app.use("/api/dayOff", dayOffRouter);
 
-
 app.listen(8000, () => {
   connect();
   console.log("Connected to backend!");
