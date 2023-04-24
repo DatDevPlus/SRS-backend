@@ -4,7 +4,6 @@ import User from "../models/User.js";
 import Role from "../models/Role.js";
 
 export const checkUser = async (req, res) => {
-  console.log(req.userId);
   try {
     const user = await User.findById(req.userId).select("-password");
     if (!user)
@@ -90,7 +89,7 @@ export const login = async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "2h" }  
+      { expiresIn: "2h" }
     );
 
     const refreshToken = jwt.sign(
@@ -193,7 +192,6 @@ export const loginGoogle = async (req, res) => {
         role: user.role_id.role_name,
         permissions: permissions,
       });
-
     }
   } catch (error) {
     console.log(error);
@@ -230,7 +228,8 @@ export const addPermission = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const permission_ids = user.permission_id.map((permission_id) =>
-    permission_id._id.toString());
+      permission_id._id.toString()
+    );
     const condition = permission_ids.includes(permission_id.toString());
     if (condition) {
       return res.status(400).json({ msg: "Permission already exists" });
@@ -278,7 +277,7 @@ export const getNewAccessToken = (req, res) => {
     const expTime = decoded.exp;
     if (Date.now() < expTime * 1000) {
       const user_id = decoded.userId;
-      const accessToken = jwt.signq(
+      const accessToken = jwt.sign(
         { userId: user_id },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "12h" }

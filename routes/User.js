@@ -12,10 +12,9 @@ import { VerifyToken } from "../middleware/auth.js";
 
 router.post("/", VerifyToken, createUser);
 router.put("/:id", VerifyToken, updateUser);
-router.put("/editAccount/:id", VerifyToken, editAccountUser);
+router.put("/editAccount", VerifyToken, editAccountUser);
 router.delete("/:id", VerifyToken, deleteUser);
 router.get("/:id", VerifyToken, getUser);
 router.get("/", VerifyToken, getUsers);
-
 
 export default router;
