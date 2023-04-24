@@ -2,8 +2,14 @@ import Group from "../models/Group.js";
 
 export const get_All_Groups = async (req, res) => {
   try {
-    const group = await Group.find().sort([["createdAt", -1]]);
-    res.json({ success: true, group });
+    const groups = await Group.find().sort([["createdAt", -1]]);
+    const groups_info = groups.map((group) => ({
+      id: group.id,
+      name: group.name ? group.name : '',
+      masters: group.masters_id ? group.masters_id.map(({_id, username}) => ({_id, name: username})) : [],
+      staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
+    }));
+    res.json({ success: true, groups: groups_info });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -13,10 +19,19 @@ export const get_All_Groups = async (req, res) => {
 export const get_Group = async (req, res) => {
   try {
     const group = await Group.findById(req.params.id);
-    res.status(200).json(group);
+    res.status(200).json({
+        id: group.id,
+        name: group.name ? group.name : '',
+        masters: group.masters_id ? group.masters_id.map(({_id, username}) => ({_id, name: username})) : [],
+        staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
+      }
+    );
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error",
+    });
   }
 };
 
@@ -34,35 +49,6 @@ export const create_Group = async (req, res) => {
       success: true,
       message: "Create complete !",
       group: newGroup,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const addID = async (req, res) => {
-  try {
-    const { masters_id, staffs_id } = req.body;
-    const group = await Group.findById(req.params.id);
-    //   const existingMasterId = Array.from(group.masters_id).some((id) =>
-    //   id.equals(masters_id)
-    // );
-    // const existingStaffId = Array.from(group.staffs_id).some((id) =>
-    //   id.equals(staffs_id)
-    // );
-
-    // if (existingMasterId || existingStaffId) {
-    //   return res.status(400).json({ msg: "ID already exists" });
-    // }
-
-    group.masters_id.push(masters_id);
-    group.staffs_id.push(staffs_id);
-    await group.save();
-    res.json({
-      success: true,
-      message: "Done !",
-      permission: group,
     });
   } catch (error) {
     console.log(error);
@@ -131,6 +117,7 @@ export const addGroupStaff = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Group not found!",
+
       });
     }
 
@@ -157,7 +144,11 @@ export const addGroupStaff = async (req, res) => {
 
     group.staffs_id.push(staff_id);
     await group.save();
-    res.json({ success: true, message: "Add new member successfully!" });
+    res.json({ 
+      success: true, 
+      message: "Add new member successfully!",
+      staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
+     });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -187,7 +178,12 @@ export const removeGroupStaff = async (req, res) => {
 
     group.staffs_id.pop(staff_id);
     await group.save();
-    res.json({ success: true, message: "Member removed successfully!" });
+    res.json({ 
+      success: true, 
+      message: "Member removed successfully!",
+      staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
+      
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -222,6 +218,8 @@ export const assignStaffAsMaster = async (req, res) => {
     res.json({
       success: true,
       message: "Update role of this person successfully!",
+      staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
+      masters: group.masters_id ? group.masters_id.map(({_id, username}) => ({_id, name: username})) : [],
     });
   } catch (error) {
     console.log(error);
@@ -259,6 +257,9 @@ export const assignMasterAsStaff = async (req, res) => {
     res.json({
       success: true,
       message: "Update role of this person successfully!",
+      staffs: '',
+      masters: '',
+
     });
   } catch (error) {
     console.log(error);

@@ -18,9 +18,10 @@ router.put('/remove-group-staff', VerifyToken, removeGroupStaff);
 router.put('/assign-staff-as-master', VerifyToken, assignStaffAsMaster);
 router.put('/assign-master-as-staff', VerifyToken, assignMasterAsStaff);
 
+router.get("/:id", VerifyToken, get_Group);
+
 router.post("/", VerifyToken, create_Group);
 router.get("/", VerifyToken, get_All_Groups);
-router.get("/:id", VerifyToken, get_Group);
 router.delete("/:id", VerifyToken, delete_Group);
 router.put("/:id", VerifyToken, update_Group);
 

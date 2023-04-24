@@ -57,3 +57,14 @@ export const getUsers = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getUsersWithStaffRole = async (req, res) => {
+  try {
+    const users = await User.find();
+    const staffs = users.filter((user) => user.role_id?.role_name.toUpperCase() === 'STAFF');
+    const staffs_info = staffs.map(({_id, username}) => ({_id, name: username}));
+    res.status(200).json(staffs_info);
+  } catch (err) {
+    console.log(err);
+  }
+}
