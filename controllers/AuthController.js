@@ -251,12 +251,18 @@ export const removePermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
     const user = await User.findById(req.params.id);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 702f2c3 (feat/dpm-day-off)
     // const condition = user.permission_id.includes(permission_id);
     // if (condition) {
     //   return res.status(400).json({ msg: "Permission already exists" });
     // }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 702f2c3 (feat/dpm-day-off)
     const removedPermission = user.permission_id.pop(permission_id);
     await user.save();
     res.json({
