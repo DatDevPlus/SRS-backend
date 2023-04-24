@@ -4,7 +4,6 @@ import User from "../models/User.js";
 import Role from "../models/Role.js";
 
 export const checkUser = async (req, res) => {
-  console.log(req.userId);
   try {
     const user = await User.findById(req.userId).select("-password");
     if (!user)
@@ -90,7 +89,7 @@ export const login = async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "2h" }  
+      { expiresIn: "2h" }
     );
 
     const refreshToken = jwt.sign(
@@ -155,7 +154,44 @@ export const loginGoogle = async (req, res) => {
         permissions: permissions,
       });
     } else {
-      res.status(200).json({ success: false, message: "Your email is not registered in this system" });
+      const hashedPassword = await argon2.hash("password");
+      const newUser = new User({
+        username: displayName,
+        email: email,
+        password: hashedPassword,
+        avatar: photoURL,
+        role: "",
+        permission_id: [],
+      });
+      await newUser.save();
+
+      const accessToken = jwt.sign(
+        { userId: newUser._id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "12h" }
+      );
+
+      const refreshToken = jwt.sign(
+        {
+          userId: newUser._id,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "2d" }
+      );
+
+      const permissions = user.permission_id?.map(
+        (item) => item.permission_detail
+      );
+
+      res.json({
+        success: true,
+        message: "User created successfully",
+        accessToken,
+        accessTokenLifeTime: jwt.decode(accessToken).exp,
+        refreshToken,
+        role: user.role_id.role_name,
+        permissions: permissions,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -192,7 +228,8 @@ export const addPermission = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     const permission_ids = user.permission_id.map((permission_id) =>
-    permission_id._id.toString());
+      permission_id._id.toString()
+    );
     const condition = permission_ids.includes(permission_id.toString());
     if (condition) {
       return res.status(400).json({ msg: "Permission already exists" });
@@ -213,12 +250,10 @@ export const removePermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
     const user = await User.findById(req.params.id);
-    const permission_ids = user.permission_id.map((permission_id) =>
-    permission_id._id.toString());
-    const condition = permission_ids.includes(permission_id.toString());
-    if (!condition) {
-      return res.status(400).json({ msg: "User does not have this permission" });
-    } 
+    // const condition = user.permission_id.includes(permission_id);
+    // if (condition) {
+    //   return res.status(400).json({ msg: "Permission already exists" });
+    // }
     const removedPermission = user.permission_id.pop(permission_id);
     await user.save();
     res.json({

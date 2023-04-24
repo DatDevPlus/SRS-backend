@@ -1,9 +1,10 @@
 import express from "express";
 const router = express.Router();
-import { createUser, updateUser, deleteUser, getUser, getUsers, getUsersWithStaffRole } from "../controllers/UserController.js"
+import { createUser, updateUser, deleteUser, getUser, getUsers, getUsersWithStaffRole, editAccountUser } from "../controllers/UserController.js"
 import { VerifyToken } from "../middleware/auth.js";
 
 router.get("/get-all-staffs", VerifyToken, getUsersWithStaffRole);
+router.put("/editAccount", VerifyToken, editAccountUser);
 
 router.post('/', VerifyToken, createUser);
 router.put('/:id', VerifyToken, updateUser);
