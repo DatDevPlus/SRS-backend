@@ -90,7 +90,7 @@ export const login = async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "12h" }
+      { expiresIn: "2h" }  
     );
 
     const refreshToken = jwt.sign(
@@ -193,6 +193,7 @@ export const loginGoogle = async (req, res) => {
         role: user.role_id.role_name,
         permissions: permissions,
       });
+
     }
   } catch (error) {
     console.log(error);
@@ -228,8 +229,10 @@ export const addPermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
     const user = await User.findById(req.params.id);
-    const condition = user.permission_id.includes(permission_id);
-    if (condition == false) {
+    const permission_ids = user.permission_id.map((permission_id) =>
+    permission_id._id.toString());
+    const condition = permission_ids.includes(permission_id.toString());
+    if (condition) {
       return res.status(400).json({ msg: "Permission already exists" });
     }
     const addPermission = user.permission_id.push(permission_id);
@@ -248,10 +251,12 @@ export const removePermission = async (req, res) => {
   const { permission_id } = req.body;
   try {
     const user = await User.findById(req.params.id);
+
     // const condition = user.permission_id.includes(permission_id);
     // if (condition) {
     //   return res.status(400).json({ msg: "Permission already exists" });
     // }
+
     const removedPermission = user.permission_id.pop(permission_id);
     await user.save();
     res.json({
@@ -273,7 +278,7 @@ export const getNewAccessToken = (req, res) => {
   try {
     const decoded = jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET);
     const expTime = decoded.exp;
-    if (new Date.now() < expTime * 1000) {
+    if (Date.now() < expTime * 1000) {
       const user_id = decoded.userId;
       const accessToken = jwt.sign(
         { userId: user_id },
