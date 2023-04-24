@@ -17,7 +17,34 @@ export const createUser = async (req, res, next) => {
     next(err);
   }
 };
+export const editAccountUser = async (req, res, next) => {
+  try {
+    const { username, email } = req.body;
+    let updateAccount = {
+      username,
+      email,
+    };
+    const updateAccountCondition = { _id: req.userId };
+    updateAccount = await User.findByIdAndUpdate(
+      updateAccountCondition,
+      updateAccount,
+      { new: true }
+    );
+    if (!updateAccount)
+      return res.status(401).json({
+        success: false,
+        message: "Group not found",
+      });
 
+    res.json({
+      success: true,
+      message: "Excellent progress!",
+      user: updateAccount,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 export const updateUser = async (req, res, next) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(
