@@ -278,7 +278,7 @@ export const getNewAccessToken = (req, res) => {
     const expTime = decoded.exp;
     if (Date.now() < expTime * 1000) {
       const user_id = decoded.userId;
-      const accessToken = jwt.signq(
+      const accessToken = jwt.sign(
         { userId: user_id },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "12h" }
