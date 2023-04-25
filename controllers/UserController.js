@@ -3,6 +3,7 @@ import argon2 from "argon2";
 export const createUser = async (req, res, next) => {
   try {
     const { username, password, email, role_id, permission_id } = req.body;
+    console.log(req.body);
     // Simple validation
     if (!username || !password)
       return res
@@ -24,29 +25,25 @@ export const createUser = async (req, res, next) => {
         role_id,
       });
       //save
-      const permission_ids = user.permission_id.map((permission_id) =>
+      await newUser.save();
+      const newAccount = newUser;
+      console.log(newAccount);
+      const permission_ids = newAccount.permission_id?.map((permission_id) =>
         permission_id._id.toString()
       );
-      const condition = permission_ids.includes(permission_id.toString());
+      const condition = permission_ids?.includes(permission_id.toString());
       if (condition) {
         return res.status(400).json({ msg: "Permission already exists" });
       }
-      const addPermission = user.permission_id.push(permission_id);
-      await newUser.save();
-      await user.save();
-      res.json({
-        msg: "create Success!",
-        addPermission,
-        newUser,
-        user,
-      });
+      const addPermission = newAccount.permission_id?.push(permission_id);
+      await newAccount.save();
+      res.status(200).json({ success: true, message: "Good" });
     } catch (error) {
       console.log(error);
       res
         .status(500)
         .json({ success: false, message: "Internal server error" });
     }
-    res.status(200).send("User has been created.");
   } catch (err) {
     next(err);
   }
@@ -122,10 +119,15 @@ export const getUsers = async (req, res, next) => {
 export const getUsersWithStaffRole = async (req, res) => {
   try {
     const users = await User.find();
-    const staffs = users.filter((user) => user.role_id?.role_name.toUpperCase() === 'STAFF');
-    const staffs_info = staffs.map(({_id, username}) => ({_id, name: username}));
+    const staffs = users.filter(
+      (user) => user.role_id?.role_name.toUpperCase() === "STAFF"
+    );
+    const staffs_info = staffs.map(({ _id, username }) => ({
+      _id,
+      name: username,
+    }));
     res.status(200).json(staffs_info);
   } catch (err) {
     console.log(err);
   }
-}
+};
