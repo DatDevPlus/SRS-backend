@@ -11,12 +11,18 @@ export const Get_All_DayOff = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
+export const Get_Information_Request = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 export const informationRequest = async (req, res) => {
   try {
     const { action, author_id } = req.body;
     if (action === "approved") {
-      const newRequest = new RequestHistory({ 
+      const newRequest = new RequestHistory({
         action,
         request_id: req.params.id,
         author_id,
