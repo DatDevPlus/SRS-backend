@@ -2,9 +2,9 @@ import Request_detail from "../models/RequestDetail.js";
 import RequestHistory from "../models/RequestHistory.js";
 export const Get_All_DayOff = async (req, res) => {
   try {
-    const request = await Request_detail.find({ status: "approved" }).sort([
-      ["status"],
-    ]);
+    const request = await Request_detail.find({
+      status: "approved" && "rejected",
+    }).sort([["status"]]);
     res.json({ success: true, request });
   } catch (error) {
     console.log(error);
@@ -36,7 +36,7 @@ export const informationRequest = async (req, res) => {
         message: "update success",
         request: newRequest,
       });
-    } else if (action === "reject") {
+    } else if (action === "rejected") {
       const newRequest = new RequestHistory({
         action,
         request_id: req.params.id,
