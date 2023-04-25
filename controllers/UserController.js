@@ -1,8 +1,10 @@
 import User from "../models/User.js";
 import argon2 from "argon2";
+import mongoose from "mongoose";
+
 export const createUser = async (req, res, next) => {
   try {
-    const { username, password, email, role_id, permission_id } = req.body;
+    const { username, password, email, role_id, permission_id = [] } = req.body;
     console.log(req.body);
     // Simple validation
     if (!username || !password)
@@ -23,20 +25,9 @@ export const createUser = async (req, res, next) => {
         email,
         password: hashedPassword,
         role_id,
+        permission_id,
       });
-      //save
       await newUser.save();
-      const newAccount = newUser;
-      console.log(newAccount);
-      const permission_ids = newAccount.permission_id?.map((permission_id) =>
-        permission_id._id.toString()
-      );
-      const condition = permission_ids?.includes(permission_id.toString());
-      if (condition) {
-        return res.status(400).json({ msg: "Permission already exists" });
-      }
-      const addPermission = newAccount.permission_id?.push(permission_id);
-      await newAccount.save();
       res.status(200).json({ success: true, message: "Good" });
     } catch (error) {
       console.log(error);
