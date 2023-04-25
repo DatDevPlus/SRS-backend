@@ -1,6 +1,5 @@
 import User from "../models/User.js";
 import argon2 from "argon2";
-import mongoose from "mongoose";
 
 export const createUser = async (req, res, next) => {
   try {
@@ -17,7 +16,7 @@ export const createUser = async (req, res, next) => {
       if (user)
         return res
           .status(400)
-          .json({ success: false, message: "Username already taken" });
+          .json({ success: false, message: "Email already taken" });
       // All good
       const hashedPassword = await argon2.hash(password);
       const newUser = new User({
