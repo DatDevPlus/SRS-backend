@@ -13,6 +13,9 @@ export const Get_All_DayOff = async (req, res) => {
 };
 export const Get_Information_Request = async (req, res) => {
   try {
+    const id = req.params.id;
+    const information_request = await RequestHistory.find({ request_id: id });
+    res.json({ success: true, information_request });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
