@@ -1,4 +1,5 @@
 import Request_detail from "../models/RequestDetail.js";
+import RequestHistory from "../models//RequestHistory.js";
 import jwt from "jsonwebtoken";
 import moment from "moment";
 
@@ -69,16 +70,27 @@ export const Create_Request = async (req, res) => {
       approvers_number,
     });
     await newRequest.save();
+
+    //Add to history
+    const newRequestHistory = new RequestHistory({
+      request_id: newRequest._id,
+      action: 'create', //create, update, approve, reject
+      author_id: user_id,
+    });
+    await newRequestHistory.save();
+
     res.json({
       success: true,
       message: "Create day off request successfully!",
-      category: newRequest,
+      request: newRequest,
     });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Update_Request = async (req, res) => {
   const {
     reason,
@@ -130,6 +142,14 @@ export const Update_Request = async (req, res) => {
         success: false,
         message: "Request not found",
       });
+
+      //Add to history
+    const newRequestHistory = new RequestHistory({
+      request_id: req.params.id,
+      action: 'update', //create, update, approve, reject
+      author_id: user_id,
+    });
+    await newRequestHistory.save();
 
     res.json({
       success: true,
