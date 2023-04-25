@@ -43,7 +43,7 @@ export const addRoleWorkspace = async (req, res) => {
 };
 export const Create_Workspace = async (req, res) => {
   try {
-    const { workspace_name, description, Manager_id } = req.body;
+    const { workspace_name, description, manager_id = [] } = req.body;
     if (!workspace_name || !description)
       return res
         .status(400)
@@ -51,7 +51,7 @@ export const Create_Workspace = async (req, res) => {
     const newWorkspace = new Workspace({
       workspace_name,
       description,
-      Manager_id: [],
+      manager_id,
     });
     await newWorkspace.save();
     res.json({

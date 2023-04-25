@@ -11,6 +11,10 @@ const WorkspaceSchema = new mongoose.Schema(
       type: String,
       require: false,
     },
+    status: {
+      type: String,
+      require: false,
+    },
     manager_id: [
       {
         type: mongoose.Schema.Types.ObjectId,
