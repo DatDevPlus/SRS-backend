@@ -9,6 +9,7 @@ import {
   removePermission,
   getNewAccessToken,
   getRole,
+  ResetPass
 } from "../controllers/AuthController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
@@ -16,6 +17,8 @@ const router = express.Router();
 router.post("/get-new-access-token", getNewAccessToken);
 
 router.post("/login", login);
+router.post("/resetPass/:id", ResetPass);
+
 router.post("/login-with-google", loginGoogle);
 router.post("/register", register);
 router.get("/getAllRole", getRole);

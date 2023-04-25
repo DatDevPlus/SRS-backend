@@ -295,3 +295,28 @@ export const getNewAccessToken = (req, res) => {
     return res.status(403).json({ success: false, message: "Invalid token" });
   }
 };
+export const ResetPass = async (req, res) => {
+  try {
+    const hashedPassword = await argon2.hash("password123");
+    let ResetPass = {
+      password: hashedPassword,
+    };
+    const resetPassCondition = { _id: req.params.id };
+    ResetPass = await User.findByIdAndUpdate(resetPassCondition, ResetPass, {
+      new: true,
+    });
+    if (!ResetPass)
+      return res.status(401).json({
+        success: false,
+        message: "User Not Found",
+      });
+
+    res.json({
+      success: true,
+      message: "Excellent progress!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

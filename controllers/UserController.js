@@ -1,15 +1,39 @@
 import User from "../models/User.js";
 import argon2 from "argon2";
+
 export const createUser = async (req, res, next) => {
   try {
-    const hashedPassword = await argon2.hash(req.body.password);
-    const newUser = new User({
-      ...req.body,
-      password: hashedPassword,
-    });
-
-    await newUser.save();
-    res.status(200).send("User has been created.");
+    const { username, password, email, role_id, permission_id = [] } = req.body;
+    console.log(req.body);
+    // Simple validation
+    if (!username || !password)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing information" });
+    try {
+      // Check for existing user
+      const user = await User.findOne({ email });
+      if (user)
+        return res
+          .status(400)
+          .json({ success: false, message: "Email already taken" });
+      // All good
+      const hashedPassword = await argon2.hash(password);
+      const newUser = new User({
+        username,
+        email,
+        password: hashedPassword,
+        role_id,
+        permission_id,
+      });
+      await newUser.save();
+      res.status(200).json({ success: true, message: "Good" });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
   } catch (err) {
     next(err);
   }
@@ -92,4 +116,4 @@ export const getUsersWithStaffRole = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
-}
+};
