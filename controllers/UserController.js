@@ -2,13 +2,50 @@ import User from "../models/User.js";
 import argon2 from "argon2";
 export const createUser = async (req, res, next) => {
   try {
-    const hashedPassword = await argon2.hash(req.body.password);
-    const newUser = new User({
-      ...req.body,
-      password: hashedPassword,
-    });
-
-    await newUser.save();
+    const { username, password, email, role_id, permission_id } = req.body;
+    // Simple validation
+    if (!username || !password)
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing information" });
+    try {
+      // Check for existing user
+      const user = await User.findOne({ email });
+      if (user)
+        return res
+          .status(400)
+          .json({ success: false, message: "Username already taken" });
+      // All good
+      const hashedPassword = await argon2.hash(password);
+      const newUser = new User({
+        username,
+        email,
+        password: hashedPassword,
+        role_id,
+      });
+      //save
+      const permission_ids = user.permission_id.map((permission_id) =>
+        permission_id._id.toString()
+      );
+      const condition = permission_ids.includes(permission_id.toString());
+      if (condition) {
+        return res.status(400).json({ msg: "Permission already exists" });
+      }
+      const addPermission = user.permission_id.push(permission_id);
+      await newUser.save();
+      await user.save();
+      res.json({
+        msg: "create Success!",
+        addPermission,
+        newUser,
+        user,
+      });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
     res.status(200).send("User has been created.");
   } catch (err) {
     next(err);
