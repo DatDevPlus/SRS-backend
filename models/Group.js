@@ -9,7 +9,6 @@ const GroupSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      require: true,
     },
     workspace_id: {
       type: mongoose.Schema.Types.ObjectId,

@@ -8,15 +8,11 @@ import {
   create_Group,
   addGroupStaff,
   removeGroupStaff,
-  assignStaffAsMaster,
-  assignMasterAsStaff
 } from "../controllers/GroupController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
 router.put('/add-group-staff', VerifyToken, addGroupStaff);
 router.put('/remove-group-staff', VerifyToken, removeGroupStaff);
-router.put('/assign-staff-as-master', VerifyToken, assignStaffAsMaster);
-router.put('/assign-master-as-staff', VerifyToken, assignMasterAsStaff);
 
 router.get("/:id", VerifyToken, get_Group);
 

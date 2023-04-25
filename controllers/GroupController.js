@@ -37,12 +37,11 @@ export const get_Group = async (req, res) => {
 
 export const create_Group = async (req, res) => {
   try {
-    const { name, description, masters_id, staffs_id } = req.body;
+    const { name, masters_id, staffs_id } = req.body;
     const newGroup = new Group({
       name,
-      description,
-      masters_id: [masters_id],
-      staffs_id: [staffs_id],
+      masters_id,
+      staffs_id,
     });
     await newGroup.save();
     res.json({
@@ -58,16 +57,17 @@ export const create_Group = async (req, res) => {
 
 export const update_Group = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, staffs_id, masters_id } = req.body;
     // Simple validation
     if (!name)
       return res
         .status(400)
         .json({ success: false, message: "Missing information !" });
-
     let updateGroup = {
       name,
       description,
+      staffs_id,
+      masters_id
     };
     const updateGroupCondition = { _id: req.params.id };
     updateGroup = await Group.findByIdAndUpdate(
@@ -76,7 +76,7 @@ export const update_Group = async (req, res) => {
       { new: true }
     );
     if (!updateGroup)
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: "Group not found",
       });
@@ -97,7 +97,7 @@ export const delete_Group = async (req, res) => {
     const groupDeleteCondition = { _id: req.params.id };
     const deleteGroup = await Group.findOneAndDelete(groupDeleteCondition);
     if (!deleteGroup)
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: "Group not found ",
       });
@@ -117,15 +117,10 @@ export const addGroupStaff = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Group not found!",
-
       });
     }
 
-    const staff_ids = group.staffs_id.map((staff_id) => staff_id._id.toString());
-    const master_ids = group.masters_id.map((master_id) =>
-      master_id._id.toString()
-    );
-
+    const master_ids = group.masters_id.map((master_id) => master_id._id.toString());
     const is_master = master_ids.includes(staff_id.toString());
     if (is_master) {
       return res.status(400).json({
@@ -134,6 +129,7 @@ export const addGroupStaff = async (req, res) => {
       });
     }
 
+    const staff_ids = group.staffs_id.map((staff_id) => staff_id._id.toString());
     const is_staff = staff_ids.includes(staff_id.toString());
     if (is_staff) {
       return res.status(400).json({
@@ -151,7 +147,10 @@ export const addGroupStaff = async (req, res) => {
      });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error", 
+    });
   }
 };
 
@@ -183,83 +182,6 @@ export const removeGroupStaff = async (req, res) => {
       message: "Member removed successfully!",
       staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
       
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const assignStaffAsMaster = async (req, res) => {
-  try {
-    const { staff_id, group_id } = req.body;
-
-    const group = await Group.findOne({ _id: group_id });
-    if (!group) {
-      return res.status(404).json({
-        success: false,
-        message: "Group not found!",
-      });
-    }
-
-    const staff_ids = group.staffs_id.map((staff_id) => staff_id._id.toString());
-    const is_staff = staff_ids.includes(staff_id.toString());
-    if (!is_staff) {
-      return res.status(400).json({
-        success: false,
-        message: "Staff does not belong to this group!",
-      });
-    }
-
-    group.staffs_id.pop(staff_id);
-    group.masters_id.push(staff_id);
-    await group.save();
-
-    res.json({
-      success: true,
-      message: "Update role of this person successfully!",
-      staffs: group.staffs_id ? group.staffs_id.map(({_id, username}) => ({_id, name: username})) : [],
-      masters: group.masters_id ? group.masters_id.map(({_id, username}) => ({_id, name: username})) : [],
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const assignMasterAsStaff = async (req, res) => {
-  try {
-    const { master_id, group_id } = req.body;
-
-    const group = await Group.findOne({ _id: group_id });
-    if (!group) {
-      return res.status(404).json({
-        success: false,
-        message: "Group not found!",
-      });
-    }
-
-    const master_ids = group.masters_id.map((master_id) =>
-      master_id._id.toString()
-    );
-    const is_master = master_ids.includes(master_id.toString());
-    if (!is_master) {
-      return res.status(400).json({
-        success: false,
-        message: "Master does not belong to this group!",
-      });
-    }
-
-    group.staffs_id.push(master_id);
-    group.masters_id.pop(master_id);
-    await group.save();
-
-    res.json({
-      success: true,
-      message: "Update role of this person successfully!",
-      staffs: '',
-      masters: '',
-
     });
   } catch (error) {
     console.log(error);
