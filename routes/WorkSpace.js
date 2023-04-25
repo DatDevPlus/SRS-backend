@@ -9,7 +9,7 @@ import {
 } from "../controllers/Workspace.js";
 import { VerifyToken } from "../middleware/auth.js";
 
-router.post("/", VerifyToken, Get_All_Workspace);
+router.get("/", VerifyToken, Get_All_Workspace);
 router.put("/:id", VerifyToken, Update_Workspace);
 router.delete("/:id", VerifyToken, Delete_Workspace);
 router.get("/:id", VerifyToken, Get_Workspace_Detail);

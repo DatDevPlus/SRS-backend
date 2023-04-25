@@ -5,7 +5,6 @@ export const Get_All_DayOff = async (req, res) => {
     const request = await Request_detail.find({ status: "approved" }).sort([
       ["status"],
     ]);
-    console.log(request);
     res.json({ success: true, request });
   } catch (error) {
     console.log(error);
@@ -17,7 +16,7 @@ export const informationRequest = async (req, res) => {
   try {
     const { action, author_id } = req.body;
     if (action === "approved") {
-      const newRequest = new RequestHistory({
+      const newRequest = new RequestHistory({ 
         action,
         request_id: req.params.id,
         author_id,
@@ -29,18 +28,6 @@ export const informationRequest = async (req, res) => {
         request: newRequest,
       });
     } else if (action === "reject") {
-      const newRequest = new RequestHistory({
-        action,
-        request_id: req.params.id,
-        author_id,
-      });
-      await newRequest.save();
-      res.json({
-        success: true,
-        message: "update success",
-        request: newRequest,
-      });
-    } else if (action === "revert") {
       const newRequest = new RequestHistory({
         action,
         request_id: req.params.id,
