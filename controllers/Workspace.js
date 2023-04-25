@@ -65,7 +65,7 @@ export const Create_Workspace = async (req, res) => {
   }
 };
 export const Update_Workspace = async (req, res) => {
-  const { workspace_name, description, Manager_id } = req.body;
+  const { workspace_name, description, manager_id = [] } = req.body;
   if (!workspace_name || !description)
     return res
       .status(400)
@@ -74,7 +74,7 @@ export const Update_Workspace = async (req, res) => {
     let updateWorkspace = {
       workspace_name,
       description,
-      Manager_id: [],
+      manager_id,
     };
     const updateWorkspaceCondition = { _id: req.params.id };
     updateWorkspace = await Workspace.findByIdAndUpdate(
