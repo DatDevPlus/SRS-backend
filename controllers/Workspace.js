@@ -44,7 +44,7 @@ export const addRoleWorkspace = async (req, res) => {
 export const Create_Workspace = async (req, res) => {
   try {
     const { workspace_name, description, manager_id = [],status } = req.body;
-    if (!workspace_name || !description)
+    if (!workspace_name )
       return res
         .status(400)
         .json({ success: false, message: "Missing information" });
