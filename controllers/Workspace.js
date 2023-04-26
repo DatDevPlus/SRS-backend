@@ -66,29 +66,31 @@ export const Create_Workspace = async (req, res) => {
   }
 };
 export const Update_Workspace = async (req, res) => {
-  const { workspace_name, description, manager_id = [], status } = req.body;
+  const { workspace_name, description, manager_id, status } = req.body;
   if (!manager_id)
     return res
       .status(400)
       .json({ success: false, message: "Missing information" });
   try {
-    let updateWorkspace = {
-      workspace_name,
-      description,
-      status,
-      manager_id,
-    };
-    const updateWorkspaceCondition = { _id: req.params.id };
-    updateWorkspace = await Workspace.findByIdAndUpdate(
-      updateWorkspaceCondition,
-      updateWorkspace,
-      { new: true }
-    );
-    if (!updateWorkspace)
+    const workspace = await Workspace.findById(req.params.id);
+    if (!workspace)
       return res.status(401).json({
         success: false,
         message: "Workspace not found",
       });
+
+    workspace.workspace_name = workspace_name;
+    workspace.description = description;
+    workspace.status = status;
+
+    // Add new manager_id values to existing array
+    if (Array.isArray(manager_id)) {
+      workspace.manager_id.push(...manager_id);
+    } else {
+      workspace.manager_id.push(manager_id);
+    }
+
+    const updateWorkspace = await workspace.save();
     res.json({
       success: true,
       message: "Excellent progress!",
@@ -99,6 +101,7 @@ export const Update_Workspace = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Delete_Workspace = async (req, res) => {
   try {
     const requestWorkspaceCondition = { _id: req.params.id };
