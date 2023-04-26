@@ -102,19 +102,6 @@ export const Update_Request = async (req, res) => {
     status,
     approvers_number,
   } = req.body;
-  if (
-    !reason ||
-    !quantity ||
-    !start_date ||
-    !end_date ||
-    !date_off_time ||
-    !date_off_type ||
-    !status ||
-    !approvers_number
-  )
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing information" });
   try {
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
