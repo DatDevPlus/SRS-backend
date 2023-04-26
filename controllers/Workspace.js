@@ -67,7 +67,7 @@ export const Create_Workspace = async (req, res) => {
 };
 export const Update_Workspace = async (req, res) => {
   const { workspace_name, description, manager_id = [], status } = req.body;
-  if (!manager_id)
+  if (manager_id.length<0)
     return res
       .status(400)
       .json({ success: false, message: "Missing information" });
