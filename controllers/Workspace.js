@@ -43,8 +43,8 @@ export const addRoleWorkspace = async (req, res) => {
 };
 export const Create_Workspace = async (req, res) => {
   try {
-    const { workspace_name, description, manager_id = [],status } = req.body;
-    if (!workspace_name )
+    const { workspace_name, description, manager_id = [], status } = req.body;
+    if (!workspace_name || !manager_id)
       return res
         .status(400)
         .json({ success: false, message: "Missing information" });
@@ -66,8 +66,8 @@ export const Create_Workspace = async (req, res) => {
   }
 };
 export const Update_Workspace = async (req, res) => {
-  const { workspace_name, description, manager_id = [] ,status} = req.body;
-  if (!workspace_name || !description)
+  const { workspace_name, description, manager_id = [], status } = req.body;
+  if (!workspace_name || !manager_id)
     return res
       .status(400)
       .json({ success: false, message: "Missing information" });

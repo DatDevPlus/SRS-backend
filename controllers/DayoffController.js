@@ -3,7 +3,7 @@ import RequestHistory from "../models/RequestHistory.js";
 export const Get_All_DayOff = async (req, res) => {
   try {
     const request = await Request_detail.find({
-      status: "approved" && "rejected",
+      status: "approved" || "rejected",
     }).sort([["status"]]);
     res.json({ success: true, request });
   } catch (error) {
