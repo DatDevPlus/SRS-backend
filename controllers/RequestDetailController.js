@@ -104,6 +104,9 @@ export const Create_Request = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Missing information" });
     }
+
+    const send_to_slack = false;
+
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
@@ -152,11 +155,15 @@ export const Create_Request = async (req, res) => {
     });
     await newRequestHistory.save();
 
+    send_to_slack = true;
+
     res.json({
       success: true,
       message: "Create day off request successfully!",
       request: newRequest,
+      send_to_slack,
     });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -254,6 +261,8 @@ export const Delete_Request = async (req, res) => {
 //
 export const approveRequest = async (req, res) => {
   try {
+    const send_to_slack = false;
+
     const { request_id } = req.body;
     const request = await Request_detail.findById({
       _id: request_id,
@@ -300,11 +309,14 @@ export const approveRequest = async (req, res) => {
     );
 
     if (updateRequest.approvers_number <= 0) {
+
       updateRequest = await Request_detail.findByIdAndUpdate(
         { _id: request_id },
         { status: "approved" },
         { new: true }
       );
+
+      send_to_slack = true;
     }
 
     // ADD NEW HISTORY
@@ -317,7 +329,7 @@ export const approveRequest = async (req, res) => {
       request_id: request_id,
       action: "approve",
       author_id: user_id,
-      description,
+      description
     });
     await newRequestHistory.save();
 
@@ -326,6 +338,7 @@ export const approveRequest = async (req, res) => {
       message: "This request is approved successfully!",
       request: updateRequest,
       history: newRequestHistory,
+      send_to_slack
     });
   } catch (error) {
     console.log(error);
