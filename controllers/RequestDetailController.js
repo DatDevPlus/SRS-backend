@@ -257,10 +257,9 @@ export const Delete_Request = async (req, res) => {
   }
 };
 
-//
 export const approveRequest = async (req, res) => {
   try {
-    const send_to_slack = false;
+    let send_to_slack = false;
 
     const { request_id } = req.body;
     const request = await Request_detail.findById({
@@ -278,7 +277,8 @@ export const approveRequest = async (req, res) => {
     const user_id = decoded.userId;
 
     // CHECK IS MASTER
-    const master_ids = await getUserGroupsMasters(user_id);
+    const master_ids = await getUserGroupsMasters(request.user_id._id.toString());
+
     if (!master_ids.includes(user_id)) {
       return res.json({
         success: false,
@@ -362,7 +362,7 @@ export const rejectRequest = async (req, res) => {
     const user_id = decoded.userId;
 
     //CHECK IS MASTER
-    const master_ids = await getUserGroupsMasters(user_id);
+    const master_ids = await getUserGroupsMasters(request.user_id._id.toString());
     if (!master_ids.includes(user_id)) {
       return res.json({
         success: false,
@@ -528,18 +528,20 @@ export const countRequestsByDayOffSession = async (req, res) => {
 };
 
 export const getUserGroupsMasters = async (user_id) => {
+
   const groups = await Group.find();
+
   const belonged_groups = groups.filter((group) => {
     return group.staffs_id
       .map((staff_id) => staff_id._id.toString())
-      .includes(user_id);
+      .includes(user_id.toString());
   });
 
   const all_master_ids = belonged_groups
     .map((group) => group.masters_id)
     .flat();
 
-  const master_ids_array = all_master_ids.map((master) => master._id);
+  const master_ids_array = all_master_ids.map((master) => master._id.toString());
 
   const master_ids = Array.from(new Set(master_ids_array));
 
