@@ -1,5 +1,7 @@
 import Request_detail from "../models/RequestDetail.js";
 import RequestHistory from "../models/RequestHistory.js";
+import Group from "../models/Group.js";
+import jwt from "jsonwebtoken";
 
 export const Get_All_DayOff = async (req, res) => {
   try {
@@ -12,7 +14,52 @@ export const Get_All_DayOff = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
+export const Revert_DayOff = async (req, res) => {
+  const {
+    reason,
+    quantity,
+    start_date,
+    end_date,
+    date_off_time,
+    date_off_type,
+  } = req.body;
+  const Id = req.params.id;
+  try {
+    const request = await Request_detail.find({
+      _id: Id,
+    });
+    var data = request[0]?.user_id._id.toString()
+    if (request.length <= 0) {
+      res.json({
+        success: false,
+        message: "Day Off does not have enough condition to revert !!!",
+      });
+    } else if(request[0]?.status === "approved"|| request[0]?.status === "rejected") {
+      const groups_masters = await getUserGroupsMasters(data);
+      let revertRequest = {
+        reason,
+        quantity,
+        start_date,
+        end_date,
+        user_id:data,
+        date_off_time,
+        date_off_type,
+        status: "approved",
+        approvers_number: groups_masters.length,
+      };
+      const revertRequestCondition = { _id: req.params.id };
+      revertRequest = await Request_detail.findByIdAndUpdate(
+        revertRequestCondition,
+        revertRequest,
+        { new: true }
+      );
+      res.json({ success: true, revertRequest });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 export const Get_Information_Request = async (req, res) => {
   try {
     const id = req.params.id;
@@ -60,4 +107,22 @@ export const informationRequest = async (req, res) => {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
+};
+export const getUserGroupsMasters = async (user_id) => {
+  const groups = await Group.find();
+  const belonged_groups = groups.filter((group) => {
+    return group.staffs_id
+      .map((staff_id) => staff_id._id.toString())
+      .includes(user_id);
+  });
+
+  const all_master_ids = belonged_groups
+    .map((group) => group.masters_id)
+    .flat();
+
+  const master_ids_array = all_master_ids.map((master) => master._id);
+
+  const master_ids = Array.from(new Set(master_ids_array));
+
+  return master_ids;
 };
