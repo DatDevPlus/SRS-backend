@@ -25,7 +25,9 @@ export const Get_Request_Detail = async (req, res) => {
 
 export const Get_All_Request = async (req, res) => {
   try {
-    const requests = await Request_detail.find().sort([["createdAt", -1]]);
+    const requests = await Request_detail.find({ status: "pending" }).sort([
+      ["updatedAt", -1],
+    ]);
     res.json({ success: true, requests });
   } catch (error) {
     console.log(error);
@@ -169,14 +171,8 @@ export const Create_Request = async (req, res) => {
 };
 
 export const Update_Request = async (req, res) => {
-  const {
-    reason,
-    quantity,
-    start_date,
-    end_date,
-    day_off_time,
-    day_off_type,
-  } = req.body;
+  const { reason, quantity, start_date, end_date, day_off_time, day_off_type } =
+    req.body;
   try {
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
@@ -299,8 +295,10 @@ export const approveRequest = async (req, res) => {
     });
 
     if (request_history.length > 0) {
-      return res
-        .json({ success: false, message: "You has approved this request!" });
+      return res.json({
+        success: false,
+        message: "You has approved this request!",
+      });
     }
 
     // UPDATE APPROVER_NUMBER AND STATUS
@@ -368,11 +366,10 @@ export const rejectRequest = async (req, res) => {
     //CHECK IS MASTER
     const master_ids = await getUserGroupsMasters(user_id);
     if (!master_ids.includes(user_id)) {
-      return res
-        .json({
-          success: false,
-          message: "You must be master of staff's group!",
-        });
+      return res.json({
+        success: false,
+        message: "You must be master of staff's group!",
+      });
     }
 
     //CHECK IF USER HAS REJECTED
@@ -382,8 +379,10 @@ export const rejectRequest = async (req, res) => {
       action: "reject",
     });
     if (request_history.length > 0) {
-      return res
-        .json({ success: false, message: "You has rejected this request!" });
+      return res.json({
+        success: false,
+        message: "You has rejected this request!",
+      });
     }
 
     const updateRequest = await Request_detail.findByIdAndUpdate(
@@ -410,9 +409,8 @@ export const rejectRequest = async (req, res) => {
       success: true,
       message: "This request is rejected successfully!",
       updateRequest,
-      newRequestHistory
+      newRequestHistory,
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
