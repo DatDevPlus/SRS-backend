@@ -9,6 +9,6 @@ const router = express.Router();
 
 router.get("/", VerifyToken, Get_All_DayOff);
 router.get("/:id", VerifyToken, Get_Information_Request);
-router.put("/:id", VerifyToken, Revert_DayOff);
+router.post("/:id", VerifyToken, Revert_DayOff);
 
 export default router;
