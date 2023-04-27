@@ -15,6 +15,23 @@ export const Get_All_DayOff = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+export const delete_DayOff = async (req, res) => {
+  try {
+    const DeleteCondition = { _id: req.params.id };
+    const delete_DayOff = await Request_detail.findOneAndDelete(
+      DeleteCondition
+    );
+    if (!delete_DayOff)
+      return res.status(404).json({
+        success: false,
+        message: "Day Off not found ",
+      });
+    res.json({ success: true, dayOff: delete_DayOff });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 export const Revert_DayOff = async (req, res) => {
   const { reason, quantity, start_date, end_date, day_off_time, day_off_type } =
     req.body;
