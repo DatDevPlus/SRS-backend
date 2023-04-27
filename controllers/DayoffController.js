@@ -16,33 +16,30 @@ export const Get_All_DayOff = async (req, res) => {
   }
 };
 export const Revert_DayOff = async (req, res) => {
-  const {
-    reason,
-    quantity,
-    start_date,
-    end_date,
-    day_off_time,
-    day_off_type,
-  } = req.body;
+  const { reason, quantity, start_date, end_date, day_off_time, day_off_type } =
+    req.body;
   const Id = req.params.id;
   try {
     const request = await Request_detail.find({
       _id: Id,
     });
-    var data = request[0]?.user_id._id.toString()
+    var data = request[0]?.user_id._id.toString();
     if (request.length <= 0) {
       res.json({
         success: false,
         message: "Day Off does not have enough condition to revert !!!",
       });
-    } else if(request[0]?.status === "approved"|| request[0]?.status === "rejected") {
+    } else if (
+      request[0]?.status === "approved" ||
+      request[0]?.status === "rejected"
+    ) {
       const groups_masters = await getUserGroupsMasters(data);
       let revertRequest = {
         reason,
         quantity,
         start_date,
         end_date,
-        user_id:data,
+        user_id: data,
         day_off_time,
         day_off_type,
         status: "pending",
@@ -58,11 +55,13 @@ export const Revert_DayOff = async (req, res) => {
       const user = await User.findById({ _id: data });
       const username = user.username;
       console.log(username);
-      const day_off_session_desc = day_off_time?.replace(/_/g, " ")
+      const day_off_session_desc = day_off_time
+        ?.replace(/_/g, " ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
-        
-      const day_off_type_desc = day_off_type === "wfh" ? "Work from home" : "Off";
-  
+
+      const day_off_type_desc =
+        day_off_type === "wfh" ? "Work from home" : "Off";
+
       const description = `
       <p>${username} reverted this request<p>
       <br/>
@@ -74,12 +73,15 @@ export const Revert_DayOff = async (req, res) => {
       <p>Reason: ${reason}</p>
       `;
 
-      await RequestHistory.findOneAndDelete({action: "approve", request_id:Id });
-  
+      await RequestHistory.findOneAndDelete({
+        action: "approve",
+        request_id: Id,
+      });
+
       //Add to history
       const newRequestHistory = new RequestHistory({
         request_id: Id,
-        action: "create",
+        action: "revert",
         author_id: data,
         description,
       });
