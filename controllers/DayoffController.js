@@ -8,7 +8,7 @@ export const Get_All_DayOff = async (req, res) => {
   try {
     const request = await Request_detail.find({
       status: "approved" || "rejected",
-    }).sort([["status"]]);
+    }).sort([["createdAt", -1]]);
     res.json({ success: true, request });
   } catch (error) {
     console.log(error);
