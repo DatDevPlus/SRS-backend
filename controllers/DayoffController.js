@@ -44,7 +44,7 @@ export const Revert_DayOff = async (req, res) => {
         user_id:data,
         date_off_time,
         date_off_type,
-        status: "approved",
+        status: "pending",
         approvers_number: groups_masters.length,
       };
       const revertRequestCondition = { _id: req.params.id };
