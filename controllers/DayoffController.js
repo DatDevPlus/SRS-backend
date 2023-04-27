@@ -30,7 +30,6 @@ export const Revert_DayOff = async (req, res) => {
       _id: Id,
     });
     var data = request[0]?.user_id._id.toString()
-    console.log(data);
     if (request.length <= 0) {
       res.json({
         success: false,
@@ -58,9 +57,8 @@ export const Revert_DayOff = async (req, res) => {
 
       const user = await User.findById({ _id: data });
       const username = user.username;
-  
-      const day_off_session_desc = day_off_time
-        .replace(/_/g, " ")
+      console.log(username);
+      const day_off_session_desc = day_off_time?.replace(/_/g, " ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
         
       const day_off_type_desc = day_off_type === "wfh" ? "Work from home" : "Off";
@@ -82,9 +80,10 @@ export const Revert_DayOff = async (req, res) => {
       const newRequestHistory = new RequestHistory({
         request_id: Id,
         action: "create",
-        author_id: user_id,
+        author_id: data,
         description,
       });
+      console.log(newRequestHistory);
       await newRequestHistory.save();
 
       res.json({ success: true, revertRequest });
