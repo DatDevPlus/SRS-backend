@@ -76,7 +76,7 @@ export const Revert_DayOff = async (req, res) => {
       <p>Reason: ${reason}</p>
       `;
 
-      const deletedHistories = ({action: "approve", request_id:Id })
+      await RequestHistory.findOneAndDelete({action: "approve", request_id:Id });
   
       //Add to history
       const newRequestHistory = new RequestHistory({
