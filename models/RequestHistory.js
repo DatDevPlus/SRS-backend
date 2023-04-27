@@ -5,8 +5,8 @@ import User from "./User.js";
 const RequestHistorySchema = new mongoose.Schema(
   {
     request_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "request_detail",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "request_detail",
     },
     action: {
       type: String,
@@ -15,6 +15,9 @@ const RequestHistorySchema = new mongoose.Schema(
     author_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
+    },
+    description: {
+      type: String,
     },
   },
   { timestamps: true }

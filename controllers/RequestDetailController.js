@@ -1,5 +1,8 @@
 import Request_detail from "../models/RequestDetail.js";
 import RequestHistory from "../models//RequestHistory.js";
+import User from "../models/User.js";
+import Group from "../models/Group.js";
+
 import jwt from "jsonwebtoken";
 import moment from "moment";
 
@@ -9,7 +12,9 @@ export const Get_Request_Detail = async (req, res) => {
       _id: req.params.id,
     });
     if (!request) {
-      res.status(404).json({ success: false, message: "Request is not exist" });
+      res
+        .status(404)
+        .json({ success: false, message: "Request does not exist" });
     }
     if (request) res.json({ success: true, request });
   } catch (error) {
@@ -20,8 +25,55 @@ export const Get_Request_Detail = async (req, res) => {
 
 export const Get_All_Request = async (req, res) => {
   try {
-    const request = await Request_detail.find().sort([["createdAt", -1]]);
-    res.json({ success: true, request });
+    const requests = await Request_detail.find().sort([["createdAt", -1]]);
+    res.json({ success: true, requests });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getAllRequestInBelongedGroups = async (req, res) => {
+  try {
+    //Get current user id
+    const authHeader = req.header("Authorization");
+    const accessToken = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user_id = decoded.userId;
+
+    //Get all user's groups
+    const groups = await Group.find();
+    const belonged_groups = groups.filter((group) => {
+      return (
+        group.staffs_id
+          .map((staff_id) => staff_id._id.toString())
+          .includes(user_id) ||
+        group.masters_id
+          .map((master_id) => master_id._id.toString())
+          .includes(user_id)
+      );
+    });
+
+    //Get all staffs in those groups
+    const all_groups_staff_ids = belonged_groups.reduce((acc, group) => {
+      // Add all staff and master IDs to the accumulator array
+      acc.push(
+        ...group.staffs_id.map((staff_id) => staff_id._id.toString()),
+        ...group.masters_id.map((master_id) => master_id._id.toString())
+      );
+      return acc;
+    }, []);
+
+    //Remove duplicate ids
+    const groups_staff_ids = Array.from(new Set(all_groups_staff_ids));
+
+    const requests = await Request_detail.find();
+
+    const groups_requests = requests.filter((request) =>
+      groups_staff_ids.includes(request.user_id._id.toString())
+    );
+
+    res.json({ success: true, requests: groups_requests });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -37,8 +89,6 @@ export const Create_Request = async (req, res) => {
       end_date,
       day_off_type,
       day_off_time,
-      status,
-      approvers_number,
     } = req.body;
     if (
       !reason ||
@@ -46,9 +96,7 @@ export const Create_Request = async (req, res) => {
       !start_date ||
       !end_date ||
       !day_off_type ||
-      !day_off_time ||
-      !status ||
-      !approvers_number
+      !day_off_time
     ) {
       return res
         .status(400)
@@ -58,6 +106,9 @@ export const Create_Request = async (req, res) => {
     const accessToken = authHeader && authHeader.split(" ")[1];
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     const user_id = decoded.userId;
+
+    const groups_masters = await getUserGroupsMasters(user_id);
+
     const newRequest = new Request_detail({
       reason,
       quantity,
@@ -66,16 +117,36 @@ export const Create_Request = async (req, res) => {
       user_id,
       day_off_type,
       day_off_time,
-      status,
-      approvers_number,
+      status: "pending",
+      approvers_number: groups_masters.length,
     });
     await newRequest.save();
+
+    const user = await User.findById({ _id: user_id });
+    const username = user.username;
+
+    const day_off_session_desc = day_off_time
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+    const day_off_type_desc = day_off_type === "wfh" ? "Work from home" : "Off";
+
+    const description = `
+    <p>${username} created a new request<p>
+    <br/>
+    <p>From: ${start_date}</p>
+    <p>To: ${end_date}</p>
+    <p>Type: ${day_off_type_desc}</p>
+    <p>Session: ${day_off_session_desc} </p>
+    <p>Quantity: ${quantity}</p>
+    <p>Reason: ${reason}</p>
+    `;
 
     //Add to history
     const newRequestHistory = new RequestHistory({
       request_id: newRequest._id,
-      action: 'create', //create, update, approve, reject
+      action: "create",
       author_id: user_id,
+      description,
     });
     await newRequestHistory.save();
 
@@ -84,7 +155,6 @@ export const Create_Request = async (req, res) => {
       message: "Create day off request successfully!",
       request: newRequest,
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -97,57 +167,61 @@ export const Update_Request = async (req, res) => {
     quantity,
     start_date,
     end_date,
-    date_off_time,
-    date_off_type,
-    status,
-    approvers_number,
+    day_off_time,
+    day_off_type,
   } = req.body;
-  if (
-    !reason ||
-    !quantity ||
-    !start_date ||
-    !end_date ||
-    !date_off_time ||
-    !date_off_type ||
-    !status ||
-    !approvers_number
-  )
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing information" });
   try {
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     const user_id = decoded.userId;
+
     let updateRequest = {
       reason,
       quantity,
       start_date,
       end_date,
       user_id,
-      date_off_time,
-      date_off_type,
-      status,
-      approvers_number,
+      day_off_type,
+      day_off_type,
     };
+
     const updateRequestCondition = { _id: req.params.id };
     updateRequest = await Request_detail.findByIdAndUpdate(
       updateRequestCondition,
       updateRequest,
       { new: true }
     );
-    if (!updateRequest)
-      return res.status(401).json({
+    if (!updateRequest) {
+      return res.status(404).json({
         success: false,
         message: "Request not found",
       });
+    }
 
-      //Add to history
+    const user = await User.findById({ _id: user_id });
+    const username = user.username;
+
+    const day_off_session_desc = day_off_time
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+    const day_off_type_desc = day_off_type === "wfh" ? "Work from home" : "Off";
+
+    const description = `
+    <p>${username} updated request<p>
+    <p>From: ${start_date}</p>
+    <p>To: ${end_date}</p>
+    <p>Type: ${day_off_type_desc}</p>
+    <p>Session: ${day_off_session_desc} </p>
+    <p>Quantity: ${quantity}</p>
+    <p>Reason: ${reason}</p>
+    `;
+
     const newRequestHistory = new RequestHistory({
-      request_id: req.params.id,
-      action: 'update', //create, update, approve, reject
+      request_id: updateRequest._id,
+      action: "update",
       author_id: user_id,
+      description,
     });
     await newRequestHistory.save();
 
@@ -172,9 +246,160 @@ export const Delete_Request = async (req, res) => {
     if (!deleteRequest)
       return res.status(401).json({
         success: false,
-        message: "Request not found ",
+        message: "Request not found",
       });
     res.json({ success: true, req: deleteRequest });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+//
+export const approveRequest = async (req, res) => {
+  try {
+    const { request_id } = req.body;
+    const request = await Request_detail.findById({
+      _id: request_id,
+    });
+    if (!request) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Request does not exist" });
+    }
+
+    const authHeader = req.header("Authorization");
+    const accessToken = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user_id = decoded.userId;
+
+    // CHECK IS MASTER
+    const master_ids = await getUserGroupsMasters(user_id);
+    if (!master_ids.includes(user_id)) {
+      return res.json({
+        success: false,
+        message: "You must be master of staff's group!",
+      });
+    }
+
+    // CHECK IF USER HAS APPROVED
+    const request_history = await RequestHistory.find({
+      author_id: user_id,
+      request_id,
+      action: "approve",
+    });
+
+    if (request_history.length > 0) {
+      return res
+        .json({ success: false, message: "You has approved this request!" });
+    }
+
+    // UPDATE APPROVER_NUMBER AND STATUS
+    let updateRequest = await Request_detail.findByIdAndUpdate(
+      { _id: request_id },
+      { approvers_number: request.approvers_number - 1 },
+      { new: true }
+    );
+
+    if (updateRequest.approvers_number <= 0) {
+      updateRequest = await Request_detail.findByIdAndUpdate(
+        { _id: request_id },
+        { status: "approved" },
+        { new: true }
+      );
+    }
+
+    // ADD NEW HISTORY
+    const user = await User.findById({ _id: user_id });
+    const username = user.username;
+
+    const description = `<p>${username} accepted request</p>`;
+
+    const newRequestHistory = new RequestHistory({
+      request_id: request_id,
+      action: "approve",
+      author_id: user_id,
+      description,
+    });
+    await newRequestHistory.save();
+
+    res.json({
+      success: true,
+      message: "This request is approved successfully!",
+      request: updateRequest,
+      history: newRequestHistory,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const rejectRequest = async (req, res) => {
+  try {
+    const { request_id } = req.body;
+    const request = await Request_detail.findById({
+      _id: request_id,
+    });
+    if (!request) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Request does not exist" });
+    }
+
+    const authHeader = req.header("Authorization");
+    const accessToken = authHeader && authHeader.split(" ")[1];
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user_id = decoded.userId;
+
+    //CHECK IS MASTER
+    const master_ids = await getUserGroupsMasters(user_id);
+    if (!master_ids.includes(user_id)) {
+      return res
+        .json({
+          success: false,
+          message: "You must be master of staff's group!",
+        });
+    }
+
+    //CHECK IF USER HAS REJECTED
+    const request_history = await RequestHistory.find({
+      author_id: user_id,
+      request_id,
+      action: "reject",
+    });
+    if (request_history.length > 0) {
+      return res
+        .json({ success: false, message: "You has rejected this request!" });
+    }
+
+    const updateRequest = await Request_detail.findByIdAndUpdate(
+      { _id: request_id },
+      { status: "rejected" },
+      { new: true }
+    );
+
+    //ADD NEW HISTORY
+    const user = await User.findById({ _id: user_id });
+    const username = user.username;
+
+    const description = `<p>${username} rejected request</p>`;
+
+    const newRequestHistory = new RequestHistory({
+      request_id: request_id,
+      action: "reject", //create, update, approve, reject
+      author_id: user_id,
+      description,
+    });
+    await newRequestHistory.save();
+
+    res.json({
+      success: true,
+      message: "This request is rejected successfully!",
+      updateRequest,
+      newRequestHistory
+    });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -248,8 +473,9 @@ export const countRequestsByMonth = async (req, res) => {
     const result = arrRequestsWithSequentialMonths.map((request) => {
       return {
         month: moment.monthsShort(request.month - 1),
-        count: request.count
-    }});
+        count: request.count,
+      };
+    });
 
     res.json({
       success: true,
@@ -261,4 +487,52 @@ export const countRequestsByMonth = async (req, res) => {
   }
 };
 
-export const countRequestsByGroup = (req, res) => {};
+export const countRequestsByDayOffSession = async (req, res) => {
+  try {
+    const requests = await Request_detail.find();
+
+    let request_day_off_time_count = {};
+
+    requests.forEach((request) => {
+      if (!request_day_off_time_count[request.day_off_time]) {
+        request_day_off_time_count[request.day_off_time] = 1;
+      } else {
+        request_day_off_time_count[request.day_off_time]++;
+      }
+    });
+
+    const result = Object.entries(request_day_off_time_count).map((pair) => {
+      return {
+        session: pair[0].charAt(0).toUpperCase() + pair[0].slice(1),
+        amount: pair[1],
+      };
+    });
+
+    res.json({
+      success: true,
+      result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getUserGroupsMasters = async (user_id) => {
+  const groups = await Group.find();
+  const belonged_groups = groups.filter((group) => {
+    return group.staffs_id
+      .map((staff_id) => staff_id._id.toString())
+      .includes(user_id);
+  });
+
+  const all_master_ids = belonged_groups
+    .map((group) => group.masters_id)
+    .flat();
+
+  const master_ids_array = all_master_ids.map((master) => master._id);
+
+  const master_ids = Array.from(new Set(master_ids_array));
+
+  return master_ids;
+};

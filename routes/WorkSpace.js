@@ -6,7 +6,7 @@ import {
   Create_Workspace,
   Update_Workspace,
   Delete_Workspace,
-} from "../controllers/Workspace.js";
+} from "../controllers/WorkspaceController.js";
 import { VerifyToken } from "../middleware/auth.js";
 
 router.get("/", VerifyToken, Get_All_Workspace);

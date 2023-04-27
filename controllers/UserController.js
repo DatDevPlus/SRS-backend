@@ -38,6 +38,7 @@ export const createUser = async (req, res, next) => {
     next(err);
   }
 };
+
 export const editAccountUser = async (req, res, next) => {
   try {
     const { username, email } = req.body;

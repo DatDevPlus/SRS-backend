@@ -11,6 +11,7 @@ import groupRoute from "./routes/Group.js";
 import permissionRoute from "./routes/Permission.js";
 import workspaceRouter from "./routes/WorkSpace.js";
 import dayOffRouter from "./routes/Dayoff.js";
+import requestHistoryRouter from "./routes/RequestHistory.js";
 
 const app = express();
 dotenv.config();
@@ -38,6 +39,7 @@ app.use("/api/groups", groupRoute);
 app.use("/api/permissions", permissionRoute);
 app.use("/api/workspace", workspaceRouter);
 app.use("/api/dayOff", dayOffRouter);
+app.use("/api/histories", requestHistoryRouter);
 
 app.listen(8000, () => {
   connect();

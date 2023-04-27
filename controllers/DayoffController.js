@@ -1,5 +1,6 @@
 import Request_detail from "../models/RequestDetail.js";
 import RequestHistory from "../models/RequestHistory.js";
+
 export const Get_All_DayOff = async (req, res) => {
   try {
     const request = await Request_detail.find({ status: "approved" }).sort([
@@ -11,13 +12,16 @@ export const Get_All_DayOff = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Get_Information_Request = async (req, res) => {
   try {
+    //
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const informationRequest = async (req, res) => {
   try {
     const { action, author_id } = req.body;

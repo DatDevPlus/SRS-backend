@@ -16,6 +16,7 @@ export const Get_Workspace_Detail = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Get_All_Workspace = async (req, res) => {
   try {
     const workspace = await Workspace.find().sort([["createdAt", -1]]);
@@ -25,6 +26,7 @@ export const Get_All_Workspace = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const addRoleWorkspace = async (req, res) => {
   const { Manager_id } = req.body;
   try {
@@ -41,6 +43,7 @@ export const addRoleWorkspace = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Create_Workspace = async (req, res) => {
   try {
     const { workspace_name, description, manager_id = [],status } = req.body;
@@ -65,6 +68,7 @@ export const Create_Workspace = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Update_Workspace = async (req, res) => {
   const { workspace_name, description, manager_id = [] ,status} = req.body;
   if (!workspace_name || !description)
@@ -99,6 +103,7 @@ export const Update_Workspace = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 export const Delete_Workspace = async (req, res) => {
   try {
     const requestWorkspaceCondition = { _id: req.params.id };
