@@ -12,6 +12,7 @@ import permissionRoute from "./routes/Permission.js";
 import workspaceRouter from "./routes/WorkSpace.js";
 import dayOffRouter from "./routes/Dayoff.js";
 import requestHistoryRouter from "./routes/RequestHistory.js";
+import slackRouter from "./routes/Slack.js";
 
 const app = express();
 dotenv.config();
@@ -40,6 +41,8 @@ app.use("/api/permissions", permissionRoute);
 app.use("/api/workspace", workspaceRouter);
 app.use("/api/dayOff", dayOffRouter);
 app.use("/api/histories", requestHistoryRouter);
+app.use("/api/requests", requestRoute);
+app.use("/api/notification", slackRouter);
 
 app.listen(8000, () => {
   connect();
