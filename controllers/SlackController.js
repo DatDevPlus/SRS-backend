@@ -1,10 +1,8 @@
 import Slack from "../models/Slack.js";
 export const getAllChannel = async (req, res) => {
   try {
-    const channelDayOff = await Slack.find().sort([["createdAt", -1]]);
-    const channelHR = await Slack.find().sort([["createdAt", -1]]);
-
-    res.json({ success: true, channelDayOff, channelHR });
+    const information = await Slack.find().sort([["createdAt", -1]]);
+    res.json({ success: true, information });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
