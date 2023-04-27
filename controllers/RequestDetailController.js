@@ -26,7 +26,7 @@ export const Get_Request_Detail = async (req, res) => {
 export const Get_All_Request = async (req, res) => {
   try {
     const requests = await Request_detail.find({ status: "pending" }).sort([
-      ["createdAt", -1],
+      ["updatedAt", -1],
     ]);
     res.json({ success: true, requests });
   } catch (error) {
