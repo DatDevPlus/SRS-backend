@@ -2,6 +2,7 @@ import Request_detail from "../models/RequestDetail.js";
 import RequestHistory from "../models/RequestHistory.js";
 import Group from "../models/Group.js";
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 export const Get_All_DayOff = async (req, res) => {
   try {
@@ -20,8 +21,8 @@ export const Revert_DayOff = async (req, res) => {
     quantity,
     start_date,
     end_date,
-    date_off_time,
-    date_off_type,
+    day_off_time,
+    day_off_type,
   } = req.body;
   const Id = req.params.id;
   try {
@@ -43,8 +44,8 @@ export const Revert_DayOff = async (req, res) => {
         start_date,
         end_date,
         user_id:data,
-        date_off_time,
-        date_off_type,
+        day_off_time,
+        day_off_type,
         status: "pending",
         approvers_number: groups_masters.length,
       };
@@ -54,6 +55,38 @@ export const Revert_DayOff = async (req, res) => {
         revertRequest,
         { new: true }
       );
+
+      const user = await User.findById({ _id: data });
+      const username = user.username;
+  
+      const day_off_session_desc = day_off_time
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+        
+      const day_off_type_desc = day_off_type === "wfh" ? "Work from home" : "Off";
+  
+      const description = `
+      <p>${username} reverted this request<p>
+      <br/>
+      <p>From: ${start_date}</p>
+      <p>To: ${end_date}</p>
+      <p>Type: ${day_off_type_desc}</p>
+      <p>Session: ${day_off_session_desc} </p>
+      <p>Quantity: ${quantity}</p>
+      <p>Reason: ${reason}</p>
+      `;
+
+      const deletedHistories = ({action: "approve", request_id:Id })
+  
+      //Add to history
+      const newRequestHistory = new RequestHistory({
+        request_id: Id,
+        action: "create",
+        author_id: user_id,
+        description,
+      });
+      await newRequestHistory.save();
+
       res.json({ success: true, revertRequest });
     }
   } catch (error) {

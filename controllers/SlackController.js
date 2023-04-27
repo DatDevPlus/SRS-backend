@@ -1,10 +1,8 @@
 import Slack from "../models/Slack.js";
 export const getAllChannel = async (req, res) => {
   try {
-    const channelDayOff = await Slack.find(day_off_channel).sort([
-      ["createdAt", -1],
-    ]);
-    const channelHR = await Slack.find(hr_channel).sort([["createdAt", -1]]);
+    const channelDayOff = await Slack.find().sort([["createdAt", -1]]);
+    const channelHR = await Slack.find().sort([["createdAt", -1]]);
 
     res.json({ success: true, channelDayOff, channelHR });
   } catch (error) {
