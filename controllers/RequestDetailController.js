@@ -133,9 +133,9 @@ export const Create_Request = async (req, res) => {
     await newRequest.save();
 
     const user = await User.findById({ _id: user_id });
-    const username = user.username;
-
-    const day_off_session_desc = day_off_time
+    if (user) {
+      const username = user.username;
+      const day_off_session_desc = day_off_time
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
     const day_off_type_desc = day_off_type === "wfh" ? "Work from home" : "Off";
@@ -150,7 +150,6 @@ export const Create_Request = async (req, res) => {
     <p>Quantity: ${quantity}</p>
     <p>Reason: ${reason}</p>
     `;
-
     //Add to history
     const newRequestHistory = new RequestHistory({
       request_id: newRequest._id,
@@ -159,6 +158,7 @@ export const Create_Request = async (req, res) => {
       description,
     });
     await newRequestHistory.save();
+    }
 
     // send_to_slack = true;
 
