@@ -105,7 +105,7 @@ export const Create_Request = async (req, res) => {
         .json({ success: false, message: "Missing information" });
     }
 
-    const send_to_slack = false;
+    let send_to_slack = false;
 
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
@@ -266,6 +266,7 @@ export const approveRequest = async (req, res) => {
     const request = await Request_detail.findById({
       _id: request_id,
     });
+
     if (!request) {
       return res
         .status(404)
