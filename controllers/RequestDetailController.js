@@ -110,14 +110,14 @@ export const Create_Request = async (req, res) => {
         .json({ success: false, message: "Missing information" });
     }
 
-    let send_to_slack = false;
+    // let send_to_slack = false;
 
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     const user_id = decoded.userId;
 
-    const groups_masters = await getUserGroupsMasters(user_id);
+    // const groups_masters = await getUserGroupsMasters(user_id);
 
     const newRequest = new Request_detail({
       reason,
@@ -128,7 +128,7 @@ export const Create_Request = async (req, res) => {
       day_off_type,
       day_off_time,
       status: "pending",
-      approvers_number: groups_masters.length,
+      approvers_number: 2,
     });
     await newRequest.save();
 
@@ -160,7 +160,7 @@ export const Create_Request = async (req, res) => {
     });
     await newRequestHistory.save();
 
-    send_to_slack = true;
+    // send_to_slack = true;
 
     res.json({
       success: true,
