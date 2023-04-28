@@ -163,7 +163,6 @@ export const Create_Request = async (req, res) => {
       request: newRequest,
       send_to_slack,
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -310,7 +309,6 @@ export const approveRequest = async (req, res) => {
     );
 
     if (updateRequest.approvers_number <= 0) {
-
       updateRequest = await Request_detail.findByIdAndUpdate(
         { _id: request_id },
         { status: "approved" },
@@ -330,7 +328,7 @@ export const approveRequest = async (req, res) => {
       request_id: request_id,
       action: "approve",
       author_id: user_id,
-      description
+      description,
     });
     await newRequestHistory.save();
 
@@ -339,7 +337,7 @@ export const approveRequest = async (req, res) => {
       message: "This request is approved successfully!",
       request: updateRequest,
       history: newRequestHistory,
-      send_to_slack
+      send_to_slack,
     });
   } catch (error) {
     console.log(error);
