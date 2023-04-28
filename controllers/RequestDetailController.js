@@ -48,10 +48,10 @@ export const getAllRequestInBelongedGroups = async (req, res) => {
     const belonged_groups = groups.filter((group) => {
       return (
         group.staffs_id
-          .map((staff_id) => staff_id._id.toString())
+          .map((staff_id) => staff_id?._id.toString())
           .includes(user_id) ||
         group.masters_id
-          .map((master_id) => master_id._id.toString())
+          .map((master_id) => master_id?._id.toString())
           .includes(user_id)
       );
     });
@@ -60,8 +60,8 @@ export const getAllRequestInBelongedGroups = async (req, res) => {
     const all_groups_staff_ids = belonged_groups.reduce((acc, group) => {
       // Add all staff and master IDs to the accumulator array
       acc.push(
-        ...group.staffs_id.map((staff_id) => staff_id._id.toString()),
-        ...group.masters_id.map((master_id) => master_id._id.toString())
+        ...group.staffs_id.map((staff_id) => staff_id?._id.toString()),
+        ...group.masters_id.map((master_id) => master_id?._id.toString())
       );
       return acc;
     }, []);
@@ -72,7 +72,7 @@ export const getAllRequestInBelongedGroups = async (req, res) => {
     const requests = await Request_detail.find();
 
     const groups_requests = requests.filter((request) =>
-      groups_staff_ids.includes(request.user_id._id.toString())
+      groups_staff_ids.includes(request?.user_id?._id.toString())
     );
 
     res.json({ success: true, requests: groups_requests });
@@ -278,7 +278,7 @@ export const approveRequest = async (req, res) => {
     const user_id = decoded.userId;
 
     // CHECK IS MASTER
-    const master_ids = await getUserGroupsMasters(request.user_id._id.toString());
+    const master_ids = await getUserGroupsMasters(request?.user_id?._id.toString());
 
     if (!master_ids.includes(user_id)) {
       return res.json({
@@ -363,7 +363,7 @@ export const rejectRequest = async (req, res) => {
     const user_id = decoded.userId;
 
     //CHECK IS MASTER
-    const master_ids = await getUserGroupsMasters(request.user_id._id.toString());
+    const master_ids = await getUserGroupsMasters(request?.user_id?._id.toString());
     if (!master_ids.includes(user_id)) {
       return res.json({
         success: false,
@@ -534,15 +534,15 @@ export const getUserGroupsMasters = async (user_id) => {
 
   const belonged_groups = groups.filter((group) => {
     return group.staffs_id
-      .map((staff_id) => staff_id._id.toString())
-      .includes(user_id.toString());
+      .map((staff_id) => staff_id?._id?.toString())
+      .includes(user_id?.toString());
   });
 
   const all_master_ids = belonged_groups
     .map((group) => group.masters_id)
     .flat();
 
-  const master_ids_array = all_master_ids.map((master) => master._id.toString());
+  const master_ids_array = all_master_ids.map((master) => master._id?.toString());
 
   const master_ids = Array.from(new Set(master_ids_array));
 
