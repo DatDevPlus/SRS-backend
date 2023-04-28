@@ -117,7 +117,7 @@ export const Create_Request = async (req, res) => {
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     const user_id = decoded.userId;
 
-    // const groups_masters = await getUserGroupsMasters(user_id);
+    const groups_masters = await getUserGroupsMasters(user_id);
 
     const newRequest = new Request_detail({
       reason,
@@ -128,7 +128,7 @@ export const Create_Request = async (req, res) => {
       day_off_type,
       day_off_time,
       status: "pending",
-      approvers_number: 2,
+      approvers_number: groups_masters && groups_masters.length > 0 ? groups_masters.length : 0,
     });
     await newRequest.save();
 

@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 let web = new WebClient(process.env.TOKEN_BOT);
-
+const channelHR = "C054Z6ASE4E"
+const channelDayoff = "C054JUNGDF1"
 export const getAllChannel = async (req, res) => {
   try {
     const information = await Slack.find().sort([["createdAt", -1]]);
@@ -70,7 +71,7 @@ export const editNotification = async (req, res) => {
 export const sendSlackHr = async (req, res) => {
   try {
     await web.chat.postMessage({
-      channel: "C054Z6ASE4E",
+      channel: channelHR,
       text:'',
       blocks: [
         {
@@ -144,7 +145,7 @@ export const sendSlackHr = async (req, res) => {
 export const sendSlackDayoff = async (req, res) => {
   try {
     await web.chat.postMessage({
-      channel: "C054JUNGDF1",
+      channel: channelDayoff,
       text:'',
       blocks: [
         {
