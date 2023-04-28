@@ -70,7 +70,7 @@ export const editNotification = async (req, res) => {
 export const sendSlackHr = async (req, res) => {
   try {
     await web.chat.postMessage({
-      channel: "C054JUNGDF1",
+      channel: "C054Z6ASE4E",
       text:'',
       blocks: [
         {
@@ -144,7 +144,7 @@ export const sendSlackHr = async (req, res) => {
 export const sendSlackDayoff = async (req, res) => {
   try {
     await web.chat.postMessage({
-      channel: "#day-off",
+      channel: "C054JUNGDF1",
       text:'',
       blocks: [
         {
