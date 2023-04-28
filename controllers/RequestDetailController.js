@@ -534,15 +534,15 @@ export const getUserGroupsMasters = async (user_id) => {
 
   const belonged_groups = groups.filter((group) => {
     return group.staffs_id
-      .map((staff_id) => staff_id?._id?.toString())
-      .includes(user_id?.toString());
+      .map((staff_id) => staff_id?._id.toString())
+      .includes(user_id.toString());
   });
 
   const all_master_ids = belonged_groups
     .map((group) => group.masters_id)
     .flat();
 
-  const master_ids_array = all_master_ids.map((master) => master._id?.toString());
+  const master_ids_array = all_master_ids.map((master) => master?._id.toString());
 
   const master_ids = Array.from(new Set(master_ids_array));
 
