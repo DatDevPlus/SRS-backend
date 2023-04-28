@@ -70,7 +70,7 @@ export const editNotification = async (req, res) => {
 export const sendSlackHr = async (req, res) => {
   try {
     await web.chat.postMessage({
-      channel: "#hr-management",
+      channel: "C054JUNGDF1",
       text:'',
       blocks: [
         {
