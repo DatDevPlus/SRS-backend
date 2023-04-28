@@ -45,16 +45,17 @@ export const getAllRequestInBelongedGroups = async (req, res) => {
 
     //Get all user's groups
     const groups = await Group.find();
-    const belonged_groups = groups.filter((group) => {
-      return (
-        group.staffs_id
-          .map((staff_id) => staff_id?._id.toString())
-          .includes(user_id) ||
-        group.masters_id
-          .map((master_id) => master_id?._id.toString())
-          .includes(user_id)
-      );
-    });
+    if (groups.length > 0) {
+      const belonged_groups = groups.filter((group) => {
+        return (
+          group.staffs_id
+            .map((staff_id) => staff_id?._id.toString())
+            .includes(user_id) ||
+          group.masters_id
+            .map((master_id) => master_id?._id.toString())
+            .includes(user_id)
+        );
+      });
 
     //Get all staffs in those groups
     const all_groups_staff_ids = belonged_groups.reduce((acc, group) => {
@@ -74,8 +75,12 @@ export const getAllRequestInBelongedGroups = async (req, res) => {
     const groups_requests = requests.filter((request) =>
       groups_staff_ids.includes(request?.user_id?._id.toString())
     );
-
     res.json({ success: true, requests: groups_requests });
+
+    }
+
+
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -538,11 +543,9 @@ export const getUserGroupsMasters = async (user_id) => {
       .includes(user_id.toString());
   });
 
-  const all_master_ids = belonged_groups
-    .map((group) => group.masters_id)
-    .flat();
+  const all_master_ids = belonged_groups?.map((group) => group.masters_id).flat();
 
-  const master_ids_array = all_master_ids.map((master) => master?._id.toString());
+  const master_ids_array = all_master_ids?.map((master) => master?._id.toString());
 
   const master_ids = Array.from(new Set(master_ids_array));
 
