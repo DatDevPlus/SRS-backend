@@ -29,7 +29,17 @@ const connect = () => {
 //middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+// app.use(cors());
+// Add the Slack API server to the CORS whitelist
+const corsOptions = {
+  origin: 'https://slack.com',
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', "DELETE"],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// Use the CORS middleware with the whitelist options
+app.use(cors(corsOptions));
 express.urlencoded({ extended: true });
 
 //routes
@@ -43,6 +53,8 @@ app.use("/api/dayOff", dayOffRouter);
 app.use("/api/histories", requestHistoryRouter);
 app.use("/api/requests", requestRoute);
 app.use("/api/notification", slackRouter);
+
+
 
 app.listen(8000, () => {
   connect();
