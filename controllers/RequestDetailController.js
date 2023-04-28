@@ -110,7 +110,7 @@ export const Create_Request = async (req, res) => {
         .json({ success: false, message: "Missing information" });
     }
 
-    // let send_to_slack = false;
+    let send_to_slack = false;
 
     const authHeader = req.header("Authorization");
     const accessToken = authHeader && authHeader.split(" ")[1];
@@ -160,7 +160,7 @@ export const Create_Request = async (req, res) => {
     await newRequestHistory.save();
     }
 
-    // send_to_slack = true;
+    send_to_slack = true;
 
     res.json({
       success: true,
