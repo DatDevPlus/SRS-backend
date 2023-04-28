@@ -1,5 +1,8 @@
 import Slack from "../models/Slack.js";
 import { WebClient }from '@slack/web-api'
+import dotenv from "dotenv";
+
+dotenv.config();
 
 let web = new WebClient(process.env.TOKEN_BOT);
 
